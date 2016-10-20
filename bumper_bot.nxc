@@ -11,6 +11,10 @@
 
 long SPEED = 50;
 
+bool drive = false;
+bool ultra = true;
+bool touch = false;
+
 mutex drive_motors;
 mutex neck_motor;
 
@@ -29,6 +33,20 @@ void stopMove() {
 void turnRight() {
     OnFwd(RIGHT, -100);
     OnFwd(LEFT, 100);
+    Wait(350);
+    stopMove();
+}
+
+void turnLeft() {
+    OnFwd(RIGHT, 100);
+    OnFwd(LEFT, -100);   
+    Wait(350);
+    stopMove();
+}
+
+void turnAround() {
+    turnRight();
+    turnRight();
 }
 
 void look(int direction, int degrees) {
@@ -59,6 +77,19 @@ int lookLeftAndGetDistance() {
     return distance;
 }
 
+int getRandomLeftOrRight() {
+
+    int direction = 0;
+
+    if ((RandomNumber % 2) == 0) {
+            direction = DIRECTION_RIGHT;
+        } else {
+            direction = DIRECTION_LEFT;
+        }
+
+        return direction;
+}
+
 int getFreeDirection(int toCloseThreshold) {
     int rightDistance = lookRightAndGetDistance();
     int leftDistance = lookLeftAndGetDistance();
@@ -70,11 +101,7 @@ int getFreeDirection(int toCloseThreshold) {
     } else if (leftDistance >= toCloseThreshold && leftDistance > rightDistance) {
         optimalDirection = DIRECTION_LEFT;
     } else if (leftDistance == rightDistance && leftDistance >= toCloseThreshold) {
-        if ((RandomNumber % 2) == 0) {
-            optimalDirection = DIRECTION_RIGHT;
-        } else {
-            optimalDirection = DIRECTION_LEFT;
-        }
+        optimalDirection = getRandomLeftOrRight();
     } else {
         optimalDirection = DIRECTION_BACK;
     }
@@ -90,7 +117,7 @@ task keepMoving() {
 
     Follows(main);
 
-    while(1) {
+    while(drive) {
     Acquire(drive_motors);
 
     moveForward(SPEED);
@@ -103,7 +130,7 @@ task reactOnTouch() {
     Follows (main);
     SetSensorTouch(TOUCH);
    
-    while (1)
+    while (touch)
     {
         
         while(!Sensor(TOUCH))
@@ -121,8 +148,7 @@ task reactOnTouch() {
         stopMove();
         Wait(400);
         turnRight();
-        Wait(350);
-        stopMove();
+        
         Wait(400);
 
         Release(drive_motors)
@@ -137,7 +163,7 @@ task reactUltra() {
     Follows(main);
   
     SetSensorLowspeed(ULTRA);
-    while (1)
+    while (ultra)
     {
         ultraDistance = SensorUS(ULTRA);
       
@@ -148,10 +174,18 @@ task reactUltra() {
 
             int direction = getFreeDirection(10);
 
-            Release(neck_motor);   
+            if (direction == DIRECTION_LEFT) {
+                turnLeft();
+            } else if (direction == DIRECTION_RIGHT) {
+                turnRight();
+            } else {
+                turnAround();
+            }
+
+            Release(neck_motor);  
+            Release(drive_motors); 
+            ultraDistance = INT_MAX;
         }
-        
-        Wait(200);
     }
 }
 
