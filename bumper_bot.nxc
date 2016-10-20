@@ -1,0 +1,181 @@
+#define RIGHT OUT_C
+#define LEFT OUT_B
+#define BOTH_DRIVE OUT_BC
+#define NECK OUT_A
+#define TOUCH IN_1
+#define ULTRA IN_4
+#define DIRECTION_RIGHT 1
+#define DIRECTION_LEFT -1
+#define DIRECTION_BACK 0
+#define NECK_ROT_SPEED 100
+
+long SPEED = 50;
+
+mutex drive_motors;
+mutex neck_motor;
+
+void moveForward(long speed) {
+    OnFwd(BOTH_DRIVE, speed);
+}
+
+void moveBackward(long speed) {
+    moveForward(-1 * speed);
+}
+
+void stopMove() {
+    OnFwd(BOTH_DRIVE, 0);
+}
+
+void turnRight() {
+    OnFwd(RIGHT, -100);
+    OnFwd(LEFT, 100);
+}
+
+void look(int direction, int degrees) {
+    RotateMotor(NECK, NECK_ROT_SPEED * direction, degrees);    
+}
+
+int lookRightAndGetDistance() {
+
+    look(DIRECTION_RIGHT, 90);
+
+    SetSensorLowspeed(ULTRA);
+    int distance = SensorUS(ULTRA);
+    
+    look(DIRECTION_LEFT, 90);
+
+    return distance;
+}
+
+int lookLeftAndGetDistance() {
+
+    look(DIRECTION_LEFT, 90);
+
+    SetSensorLowspeed(ULTRA);
+    int distance = SensorUS(ULTRA);
+    
+    look(DIRECTION_RIGHT, 90);
+
+    return distance;
+}
+
+int getFreeDirection(int toCloseThreshold) {
+    int rightDistance = lookRightAndGetDistance();
+    int leftDistance = lookLeftAndGetDistance();
+
+    int optimalDirection = 0;
+
+    if (rightDistance >= toCloseThreshold && rightDistance > leftDistance) {
+        optimalDirection = DIRECTION_RIGHT;
+    } else if (leftDistance >= toCloseThreshold && leftDistance > rightDistance) {
+        optimalDirection = DIRECTION_LEFT;
+    } else if (leftDistance == rightDistance && leftDistance >= toCloseThreshold) {
+        if ((RandomNumber % 2) == 0) {
+            optimalDirection = DIRECTION_RIGHT;
+        } else {
+            optimalDirection = DIRECTION_LEFT;
+        }
+    } else {
+        optimalDirection = DIRECTION_BACK;
+    }
+
+    return optimalDirection;
+}
+
+task main() {
+    
+}
+
+task keepMoving() {
+
+    Follows(main);
+
+    while(1) {
+    Acquire(drive_motors);
+
+    moveForward(SPEED);
+
+    Release(drive_motors);
+    }
+}
+
+task reactOnTouch() {
+    Follows (main);
+    SetSensorTouch(TOUCH);
+   
+    while (1)
+    {
+        
+        while(!Sensor(TOUCH))
+        {
+            ;
+        }
+        
+        Acquire(drive_motors)
+    ;
+
+        stopMove();
+        Wait(400);
+        moveBackward(SPEED);
+        Wait(400);
+        stopMove();
+        Wait(400);
+        turnRight();
+        Wait(350);
+        stopMove();
+        Wait(400);
+
+        Release(drive_motors)
+    ;
+    }
+}
+
+task reactUltra() {
+    short ultraDistance = 0;
+    short toCloseThreshold = 10;
+   
+    Follows(main);
+  
+    SetSensorLowspeed(ULTRA);
+    while (1)
+    {
+        ultraDistance = SensorUS(ULTRA);
+      
+        if (ultraDistance <= toCloseThreshold)
+        {
+            Acquire(drive_motors);
+            Acquire(neck_motor);
+
+            int direction = getFreeDirection(10);
+
+            Release(neck_motor);   
+        }
+        
+        Wait(200);
+    }
+}
+
+// #define MOTOR OUT_A
+// #define FULL_SPEED 100
+// #define DEG_TO_RPM 166.6667 // converts degrees per millisecond to RPM
+// long prev_tick;
+// long prev_deg = 0;
+// string rpm_msg()
+// {
+//    long dt = CurrentTick() - prev_tick;
+//    long deg = MotorRotationCount(MOTOR) - prev_deg;
+//    float rpm = deg * DEG_TO_RPM / dt;
+//    prev_deg = MotorRotationCount(MOTOR);
+//    prev_tick = CurrentTick();
+//    return FormatNum("RPM: %5.1f", rpm);
+// }
+// task main()
+// {
+//    prev_tick = CurrentTick();
+//    OnFwd(MOTOR, FULL_SPEED);
+//    while (true)
+//    {
+//       Wait(MS_500); // update display every 0.5 seconds
+//       TextOut(0, LCD_LINE2, rpm_msg(), true);
+//    }
+// }
