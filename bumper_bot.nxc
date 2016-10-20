@@ -30,6 +30,12 @@ void stopMove() {
     OnFwd(BOTH_DRIVE, 0);
 }
 
+void rotate90(int direction)
+{
+	RotateMotor(RIGHT, 50 * direction, 225);
+	RotateMotor(LEFT, -50 * direction, 225);
+}
+
 void turnRight() {
     OnFwd(RIGHT, -100);
     OnFwd(LEFT, 100);
@@ -175,9 +181,9 @@ task reactUltra() {
             int direction = getFreeDirection(10);
 
             if (direction == DIRECTION_LEFT) {
-                turnLeft();
+                rotate90(DIRECTION_LEFT);
             } else if (direction == DIRECTION_RIGHT) {
-                turnRight();
+                rotate90(DIRECTION_RIGHT);
             } else {
                 turnAround();
             }
