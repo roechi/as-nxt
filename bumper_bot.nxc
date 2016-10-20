@@ -2,18 +2,19 @@
 #define LEFT OUT_B
 #define BOTH_DRIVE OUT_BC
 #define NECK OUT_A
+#define GROUND_DETECTOR_L IN_2
+#define GROUND_DETECTOR_R IN_3
 #define TOUCH IN_1
 #define ULTRA IN_4
 #define DIRECTION_RIGHT 1
 #define DIRECTION_LEFT -1
 #define DIRECTION_BACK 0
-#define NECK_ROT_SPEED 100
+#define NECK_ROT_SPEED 50
+#define SPEED 50
 
-long SPEED = 50;
-
-bool drive = false;
+bool drive = true;
 bool ultra = true;
-bool touch = false;
+bool touch = true;
 
 mutex drive_motors;
 mutex neck_motor;
@@ -32,22 +33,18 @@ void stopMove() {
 
 void rotate90(int direction)
 {
-	RotateMotor(RIGHT, 50 * direction, 225);
-	RotateMotor(LEFT, -50 * direction, 225);
+	//RotateMotor(RIGHT, 50 * direction, 225);
+	//RotateMotor(LEFT, -50 * direction, 225);
+	
+	RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
 }
 
 void turnRight() {
-    OnFwd(RIGHT, -100);
-    OnFwd(LEFT, 100);
-    Wait(350);
-    stopMove();
+    rotate90(DIRECTION_RIGHT);
 }
 
 void turnLeft() {
-    OnFwd(RIGHT, 100);
-    OnFwd(LEFT, -100);   
-    Wait(350);
-    stopMove();
+    rotate90(DIRECTION_LEFT);
 }
 
 void turnAround() {
@@ -115,6 +112,25 @@ int getFreeDirection(int toCloseThreshold) {
     return optimalDirection;
 }
 
+void lookForNewDirection()
+{	
+	stopMove();
+	
+	Acquire(neck_motor);
+
+	int direction = getFreeDirection(10);
+
+	if (direction == DIRECTION_LEFT) {
+		rotate90(DIRECTION_LEFT);
+	} else if (direction == DIRECTION_RIGHT) {
+		rotate90(DIRECTION_RIGHT);
+	} else {
+		turnAround();
+	}
+
+	Release(neck_motor);
+}
+
 task main() {
     
 }
@@ -135,30 +151,29 @@ task keepMoving() {
 task reactOnTouch() {
     Follows (main);
     SetSensorTouch(TOUCH);
+	SetSensorLight(GROUND_DETECTOR_R);
+	SetSensorLight(GROUND_DETECTOR_L);
+	
+	int lightValueR = Sensor(GROUND_DETECTOR_R);
+	int lightValueL = Sensor(GROUND_DETECTOR_L);
    
     while (touch)
     {
-        
-        while(!Sensor(TOUCH))
+        while(!Sensor(TOUCH) && !(abs(lightValueR - Sensor(GROUND_DETECTOR_R)) > 20) && !(abs(lightValueL - Sensor(GROUND_DETECTOR_L)) > 20))
         {
             ;
         }
         
-        Acquire(drive_motors)
-    ;
+        Acquire(drive_motors);
 
         stopMove();
         Wait(400);
         moveBackward(SPEED);
         Wait(400);
         stopMove();
-        Wait(400);
-        turnRight();
-        
-        Wait(400);
-
-        Release(drive_motors)
-    ;
+		
+		lookForNewDirection();
+		Release(drive_motors);
     }
 }
 
@@ -175,47 +190,10 @@ task reactUltra() {
       
         if (ultraDistance <= toCloseThreshold)
         {
-            Acquire(drive_motors);
-            Acquire(neck_motor);
-
-            int direction = getFreeDirection(10);
-
-            if (direction == DIRECTION_LEFT) {
-                rotate90(DIRECTION_LEFT);
-            } else if (direction == DIRECTION_RIGHT) {
-                rotate90(DIRECTION_RIGHT);
-            } else {
-                turnAround();
-            }
-
-            Release(neck_motor);  
-            Release(drive_motors); 
+			Acquire(drive_motors);
+            lookForNewDirection();
+			Release(drive_motors);
             ultraDistance = INT_MAX;
         }
     }
 }
-
-// #define MOTOR OUT_A
-// #define FULL_SPEED 100
-// #define DEG_TO_RPM 166.6667 // converts degrees per millisecond to RPM
-// long prev_tick;
-// long prev_deg = 0;
-// string rpm_msg()
-// {
-//    long dt = CurrentTick() - prev_tick;
-//    long deg = MotorRotationCount(MOTOR) - prev_deg;
-//    float rpm = deg * DEG_TO_RPM / dt;
-//    prev_deg = MotorRotationCount(MOTOR);
-//    prev_tick = CurrentTick();
-//    return FormatNum("RPM: %5.1f", rpm);
-// }
-// task main()
-// {
-//    prev_tick = CurrentTick();
-//    OnFwd(MOTOR, FULL_SPEED);
-//    while (true)
-//    {
-//       Wait(MS_500); // update display every 0.5 seconds
-//       TextOut(0, LCD_LINE2, rpm_msg(), true);
-//    }
-// }
