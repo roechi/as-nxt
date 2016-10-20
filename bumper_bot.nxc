@@ -32,10 +32,7 @@ void stopMove() {
 }
 
 void rotate90(int direction)
-{
-	//RotateMotor(RIGHT, 50 * direction, 225);
-	//RotateMotor(LEFT, -50 * direction, 225);
-	
+{	
 	RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
 }
 
@@ -156,10 +153,16 @@ task reactOnTouch() {
 	
 	int lightValueR = Sensor(GROUND_DETECTOR_R);
 	int lightValueL = Sensor(GROUND_DETECTOR_L);
-   
+    bool continue = false;
+
     while (touch)
     {
-        while(!Sensor(TOUCH) && !(abs(lightValueR - Sensor(GROUND_DETECTOR_R)) > 20) && !(abs(lightValueL - Sensor(GROUND_DETECTOR_L)) > 20))
+
+        continue = !Sensor(TOUCH) 
+            && !(abs(lightValueR - Sensor(GROUND_DETECTOR_R)) > 20) 
+            && !(abs(lightValueL - Sensor(GROUND_DETECTOR_L)) > 20);
+
+        while(continue)
         {
             ;
         }
