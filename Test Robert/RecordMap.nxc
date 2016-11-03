@@ -1,0 +1,201 @@
+#define RIGHT OUT_C
+#define LEFT OUT_B
+#define BOTH_DRIVE OUT_BC
+#define NECK OUT_A
+#define GROUND_DETECTOR_L IN_2
+#define GROUND_DETECTOR_R IN_3
+#define TOUCH IN_1
+#define ULTRA IN_4
+#define DIRECTION_RIGHT 1
+#define DIRECTION_LEFT -1
+#define DIRECTION_BACK 0
+#define NECK_ROT_SPEED 50
+#define SPEED 50
+int MAP_DIMATION = 100;
+
+bool drive = true;
+bool ultra = true;
+bool touch = true;
+
+byte map[MAP_DIMATION][MAP_DIMATION];
+
+int locationX = 50;
+int locationY = 50;
+
+int direction = 0;
+
+mutex drive_motors;
+mutex neck_motor;
+
+void randomTurn90();
+void updateMap(bool foundObstical);
+void drawMap();
+void turnRight();
+void drawDebug();
+
+void updateLocation() {
+     NumOut(0,40,direction);
+
+     switch (direction) {
+         case 0:
+             locationX++;
+             break;
+         case 1:
+             locationY--;
+             break;
+         case 2:
+             locationX--;
+             break;
+         case 3:
+             locationY++;
+             break;
+     }
+     
+     bool foundBorder = false;
+     
+     if (locationX < 0)
+     {
+        locationX++;
+        foundBorder = true;
+     }
+     if (locationY < 0)
+     {
+         locationY++;
+         foundBorder = true;
+     }
+     if(locationX >= MAP_DIMATION)
+     {
+        locationX = MAP_DIMATION - 1;
+        foundBorder = true;
+     }
+     if(locationY >= MAP_DIMATION)
+     {
+        locationY = MAP_DIMATION - 1;
+        foundBorder = true;
+     }
+     
+     updateMap(foundBorder);
+     if (foundBorder) {
+        direction++;
+        direction = direction % 4;
+        turnRight();
+     }
+}
+
+void updateMap(bool foundObstical) {
+     if (foundObstical)
+     {
+        map[locationX][locationY] = 255;
+        drawMap();
+     }
+}
+
+
+void moveForward(long speed) {
+    RotateMotor(BOTH_DRIVE, speed, 400);
+    //OnFwdSync(BOTH_DRIVE, speed, 200);
+    updateLocation();
+    drawDebug();
+}
+
+void moveBackward(long speed) {
+    moveForward(-1 * speed);
+}
+
+void stopMove() {
+    OnFwd(BOTH_DRIVE, 0);
+}
+
+void rotate90(int direction)
+{
+	RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
+}
+
+void turnRight() {
+    rotate90(DIRECTION_RIGHT);
+}
+
+void turnLeft() {
+    rotate90(DIRECTION_LEFT);
+}
+
+void turnAround() {
+    turnRight();
+    turnRight();
+}
+
+void randomTurn90() {
+     if(rand() % 2)
+     {
+         turnLeft();
+     }
+     else
+     {
+         turnRight();
+     }
+}
+
+void drawMap() {
+     for (int i = 0; i < MAP_DIMATION; i++) {
+         for (int j = 0; j < MAP_DIMATION; j++) {
+             if (map[i][j]) {
+                PointOut(i, j);
+             }
+         }
+     }
+}
+
+void drawDebug() {
+     TextOut(0, 10, "x:");
+     NumOut(10,10, locationX);
+     TextOut(0, 0, "y:");
+     NumOut(10,0, locationY);
+}
+
+
+task main() {
+
+}
+
+/*task draw() {
+    Follows(main);
+    while(drive) {
+        drawMap();
+        drawDebug();
+    }
+}*/
+
+task keepMoving() {
+
+    Follows(main);
+
+    while(drive) {
+        Acquire(drive_motors);
+        moveForward(SPEED);
+        Release(drive_motors);
+    }
+}
+
+task reactUltra() {
+    short ultraDistance = 0;
+    short toCloseThreshold = 20;
+
+    Follows(main);
+
+    SetSensorLowspeed(ULTRA);
+    while (ultra)
+    {
+        ultraDistance = SensorUS(ULTRA);
+
+        if (ultraDistance <= toCloseThreshold)
+        {
+			      Acquire(drive_motors);
+            updateMap(true);
+            direction++;
+            direction = direction % 4;
+            turnRight();
+			      Release(drive_motors);
+            ultraDistance = INT_MAX;
+        }
+    }
+}
