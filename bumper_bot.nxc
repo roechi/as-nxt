@@ -10,14 +10,20 @@
 #define DIRECTION_LEFT -1
 #define DIRECTION_BACK 0
 #define NECK_ROT_SPEED 50
-#define SPEED 50
+#define SPEED 100
+#define MAX_US_DISTANCE 25
+#define LIGHT_THRESHOLD 15
 
+// Flags for different interaction modes
 bool drive = true;
 bool ultra = true;
 bool touch = true;
 
+// Define motor mutexes for synchronization
 mutex drive_motors;
 mutex neck_motor;
+
+// +++ FUNXTIONS +++
 
 void moveForward(long speed) {
     OnFwd(BOTH_DRIVE, speed);
@@ -115,7 +121,7 @@ void lookForNewDirection()
 	
 	Acquire(neck_motor);
 
-	int direction = getFreeDirection(10);
+	int direction = getFreeDirection(MAX_US_DISTANCE);
 
 	if (direction == DIRECTION_LEFT) {
 		rotate90(DIRECTION_LEFT);
@@ -127,6 +133,8 @@ void lookForNewDirection()
 
 	Release(neck_motor);
 }
+
+// +++ TASKS +++
 
 task main() {
     
@@ -151,18 +159,13 @@ task reactOnTouch() {
 	SetSensorLight(GROUND_DETECTOR_R);
 	SetSensorLight(GROUND_DETECTOR_L);
 	
-	int lightValueR = Sensor(GROUND_DETECTOR_R);
-	int lightValueL = Sensor(GROUND_DETECTOR_L);
-    bool continue = false;
+	int lightValueAverage = (Sensor(GROUND_DETECTOR_R) + Sensor(GROUND_DETECTOR_L)) / 2;
 
     while (touch)
     {
-
-        continue = !Sensor(TOUCH) 
-            && !(abs(lightValueR - Sensor(GROUND_DETECTOR_R)) > 20) 
-            && !(abs(lightValueL - Sensor(GROUND_DETECTOR_L)) > 20);
-
-        while(continue)
+        while(!Sensor(TOUCH) 
+            && (abs(lightValueAverage - Sensor(GROUND_DETECTOR_R)) < LIGHT_THRESHOLD) 
+            && (abs(lightValueAverage - Sensor(GROUND_DETECTOR_L)) < LIGHT_THRESHOLD))
         {
             ;
         }
@@ -182,7 +185,6 @@ task reactOnTouch() {
 
 task reactUltra() {
     short ultraDistance = 0;
-    short toCloseThreshold = 10;
    
     Follows(main);
   
@@ -191,7 +193,7 @@ task reactUltra() {
     {
         ultraDistance = SensorUS(ULTRA);
       
-        if (ultraDistance <= toCloseThreshold)
+        if (ultraDistance <= MAX_US_DISTANCE)
         {
 			Acquire(drive_motors);
             lookForNewDirection();
