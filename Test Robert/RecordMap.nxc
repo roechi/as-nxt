@@ -24,14 +24,32 @@ int locationY = 50;
 
 int direction = 0;
 
+//http://www.pages.drexel.edu/~pyo22/mem380Mechatronics2Spring2010-2011/week06/lab/mechatronics2-LabBricMotorVelocityAndDataAcquisition.pdf
+// Global variables
+/*
+unsigned int result; // flag returned when handling files
+byte fileHandle; // handle to the data file
+short fileSize; // size of the file
+short bytesWritten; // number of bytes written to the file
+string fileHeader; // column header for data in the file
+int fileNumber, filePart; // integers to split up data file names
+string fileName; // name of the file
+string strFileNumber; // file number e.g myDataFile 1, 2, 3
+string strFilePart; // file part e.g. myDataFile1-1, 1-2, 1-3
+string text; // string to be written to file i.e. data values
+*/
+
+
 mutex drive_motors;
 mutex neck_motor;
 
-void randomTurn90();
 void updateMap(bool foundObstical);
 void drawMap();
-void turnRight();
 void drawDebug();
+void turnRightByAngle(int angle);
+void InitWriteToFile();
+void saveMap();
+void WriteToFile(string strTempText);
 
 void updateLocation() {
      NumOut(0,40,direction);
@@ -41,12 +59,28 @@ void updateLocation() {
              locationX++;
              break;
          case 1:
+             locationX++;
              locationY--;
              break;
          case 2:
-             locationX--;
+             locationY--;
              break;
          case 3:
+             locationY--;
+             locationX--;
+             break;
+         case 4:
+             locationX--;
+             break;
+         case 5:
+             locationY++;
+             locationX--;
+             break;
+         case 6:
+             locationY++;
+             break;
+         case 7:
+             locationX++;
              locationY++;
              break;
      }
@@ -78,7 +112,7 @@ void updateLocation() {
      if (foundBorder) {
         direction++;
         direction = direction % 4;
-        turnRight();
+        turnRightByAngle(45);
      }
 }
 
@@ -86,53 +120,27 @@ void updateMap(bool foundObstical) {
      if (foundObstical)
      {
         map[locationX][locationY] = 255;
-        drawMap();
      }
+     else
+     {
+         map[locationX][locationY] = 128;
+     }
+     //NumOut(0, 0, 0);
+     drawMap();
+     //NumOut(0, 0, 1);
+     //saveMap();
 }
 
 
 void moveForward(long speed) {
     RotateMotor(BOTH_DRIVE, speed, 400);
-    //OnFwdSync(BOTH_DRIVE, speed, 200);
     updateLocation();
     drawDebug();
 }
 
-void moveBackward(long speed) {
-    moveForward(-1 * speed);
-}
-
-void stopMove() {
-    OnFwd(BOTH_DRIVE, 0);
-}
-
-void rotate90(int direction)
+void turnRightByAngle(int angle)
 {
-	RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
-}
-
-void turnRight() {
-    rotate90(DIRECTION_RIGHT);
-}
-
-void turnLeft() {
-    rotate90(DIRECTION_LEFT);
-}
-
-void turnAround() {
-    turnRight();
-    turnRight();
-}
-
-void randomTurn90() {
-     if(rand() % 2)
-     {
-         turnLeft();
-     }
-     else
-     {
-         turnRight();
-     }
+     RotateMotorEx(BOTH_DRIVE, SPEED, 225 / 2 , -DIRECTION_RIGHT * 100, true, true);
 }
 
 void drawMap() {
@@ -157,14 +165,6 @@ task main() {
 
 }
 
-/*task draw() {
-    Follows(main);
-    while(drive) {
-        drawMap();
-        drawDebug();
-    }
-}*/
-
 task keepMoving() {
 
     Follows(main);
@@ -178,7 +178,7 @@ task keepMoving() {
 
 task reactUltra() {
     short ultraDistance = 0;
-    short toCloseThreshold = 20;
+    short toCloseThreshold = 30;
 
     Follows(main);
 
@@ -193,9 +193,92 @@ task reactUltra() {
             updateMap(true);
             direction++;
             direction = direction % 4;
-            turnRight();
+            turnRightByAngle(45);
 			      Release(drive_motors);
             ultraDistance = INT_MAX;
         }
     }
 }
+
+
+//http://www.pages.drexel.edu/~pyo22/mem380Mechatronics2Spring2010-2011/week06/lab/mechatronics2-LabBricMotorVelocityAndDataAcquisition.pdf
+// Create and initialize a file
+/*void InitWriteToFile() {
+ NumOut(0, 0, 0);
+ fileNumber = 0; // set first data file to be zero
+ filePart = 0; // set first part of first data file to zero
+ fileName = "map.csv"; // name of data file
+ result=CreateFile(fileName, 1024, fileHandle);
+ // NXT Guide Section 9.100 pg. 1812 and Section 6.59.2.2 pg. 535
+ // returns file handle (unsigned int)
+
+ NumOut(0, 0, 1);
+
+ // check if the file already exists
+ while (result==LDR_FILEEXISTS) // LDR_FILEEXISTS is returned if file pre-exists
+ {
+  NumOut(0, 0, 2);
+  CloseFile(fileHandle);
+  fileNumber = fileNumber + 1; // if data file already exists, create new one
+  fileName=NumToStr(fileNumber);
+  result=CreateFile(fileName, 1024, fileHandle);
+  NumOut(0, 0, result);
+ } // end while
+} // end InitWriteToFile
+
+
+void saveMap() {
+NumOut(0, 0, 2);
+     InitWriteToFile();
+     for (int i = 0; i < MAP_DIMATION; i++) {
+         string row = "";
+         for (int j = 0; j < MAP_DIMATION; j++) {
+             row = row + map[i][j];
+             if (j < MAP_DIMATION - 1) {
+                row = row + ", ";
+             }
+         }
+         WriteToFile(row);
+     }
+}
+
+
+//-90 0 a2 0
+//90 0 a3 0
+
+
+
+void WriteToFile(string strTempText) {
+ // strTempText stores the text (i.e. ticks and motorRpm to be written to file
+ // write string to file
+ result=WriteLnString(fileHandle, strTempText, bytesWritten);
+ // if the end of file is reached, close the file and create a new part
+ if (result==LDR_EOFEXPECTED) // LDR_EOFEXPECTED is flagged when end-of-file
+ {
+ // close the current file
+ CloseFile(fileHandle);
+ // NXT Guide Section 6.59.2.1 pg. 535
+ // Closes file associated with file handle
+
+ // create the next file name
+ filePart = filePart + 1;
+ strFileNumber = NumToStr(fileNumber);
+ strFilePart = NumToStr(filePart);
+ fileName = StrCat("myMotorSpeed", strFileNumber,"-", strFilePart ,".csv");
+ // delete the file if it exists
+ DeleteFile(fileName);
+ // NXT Guide Section 6.59.2.5 pg. 537
+ // Delete the file specified by the string input
+
+ // create a new file
+ CreateFile(fileName, 1024, fileHandle);
+ // play a tone every time a file is created
+ PlayTone(TONE_B7, 5);
+ WriteLnString(fileHandle, strTempText, bytesWritten);
+ } // end if
+} // end WriteToFile
+// Close the file
+void StopWriteToFile() {
+ // close the file
+ CloseFile(fileHandle);
+} // end StopWriteToFile       */
