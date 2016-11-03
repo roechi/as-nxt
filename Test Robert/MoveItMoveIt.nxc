@@ -1,0 +1,70 @@
+#define RIGHT OUT_C
+#define LEFT OUT_B
+#define BOTH_DRIVE OUT_BC
+#define NECK OUT_A
+#define GROUND_DETECTOR_L IN_2
+#define GROUND_DETECTOR_R IN_3
+#define TOUCH IN_1
+#define ULTRA IN_4
+#define DIRECTION_RIGHT 1
+#define DIRECTION_LEFT -1
+#define DIRECTION_BACK 0
+#define NECK_ROT_SPEED 50
+#define SPEED 100
+
+bool drive = true;
+bool ultra = true;
+bool touch = true;
+
+mutex drive_motors;
+mutex neck_motor;
+
+void moveForward(long speed) {
+    OnFwd(BOTH_DRIVE, speed);
+}
+
+void moveBackward(long speed) {
+    moveForward(-1 * speed);
+}
+
+void stopMove() {
+    OnFwd(BOTH_DRIVE, 0);
+}
+
+void rotate90(int direction)
+{
+	RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
+}
+
+void turnRight() {
+    rotate90(DIRECTION_RIGHT);
+}
+
+void turnLeft() {
+    rotate90(DIRECTION_LEFT);
+}
+
+void turnAround() {
+    turnRight();
+    turnRight();
+}
+
+
+task main() {
+
+}
+
+task keepMoving() {
+
+    Follows(main);
+
+    while(drive) {
+        Acquire(drive_motors);
+
+        moveForward(SPEED);
+
+        Release(drive_motors);
+    }
+}
+
+
