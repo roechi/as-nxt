@@ -1,0 +1,213 @@
+#define RIGHT OUT_C
+#define LEFT OUT_B
+#define BOTH_DRIVE OUT_BC
+#define GROUND_DETECTOR_L IN_2
+#define GROUND_DETECTOR_R IN_3
+#define DIRECTION_RIGHT 1
+#define DIRECTION_LEFT -1
+#define DIRECTION_BACK 0
+#define SPEED 50
+int MAP_DIMATION = 50;
+int MAP_LEFT_OFFSET = 35;
+int MAP_LEFT_BOTTOM = 1;
+
+bool drive = true;
+bool searchTarget = true;
+
+byte map[MAP_DIMATION][MAP_DIMATION];
+
+int locationX = 0;
+int locationY = 0;
+
+int targetX = -1;
+int targetY = -1;
+
+int currentDirection = 1;
+
+
+void drawMap();
+void drawDebug();
+void turnRightByAngle(int angle);
+void rotate90(int direction);
+void turnRight();
+void turnLeft();
+void turnAround();
+void moveForward(long speed);
+
+void initTestMap() {
+     for (int x = 0; x < MAP_DIMATION; x++) {
+         for (int y = 0; y < MAP_DIMATION; y++) {
+             if (x == y) {
+                 map[x][y] = 1;
+             } else {
+                 map[x][y] = 0;
+             }
+         }
+     }
+}
+
+void findNextTarget() {
+     for (int x = locationX - 1; x <= locationX + 1; x++) {
+         for (int y = locationY -1; y <= locationY + 1; y++) {
+             if (x >= 0 &&
+                y >= 0 &&
+                x < MAP_DIMATION &&
+                y < MAP_DIMATION &&
+                map[x][y] == 1) {
+                targetX = x;
+                targetY = y;
+                searchTarget = false;
+                return;
+             }
+         }
+     }
+}
+
+void rotateToDirection(int direction) {
+     if (direction == currentDirection) {
+        return;
+     }
+     if ((direction == 1 && currentDirection == 4) ||
+         (direction == 4 && currentDirection == 3) ||
+         (direction == 3 && currentDirection == 2) ||
+         (direction == 2 && currentDirection == 1)) {
+         turnLeft();
+     } else if ((direction == 4 && currentDirection == 1) ||
+         (direction == 3 && currentDirection == 2) ||
+         (direction == 2 && currentDirection == 3) ||
+         (direction == 1 && currentDirection == 4)) {
+         turnRight();
+     } else if ((direction == 1 && currentDirection == 3) ||
+         (direction == 4 && currentDirection == 2) ||
+         (direction == 3 && currentDirection == 1) ||
+         (direction == 2 && currentDirection == 4)) {
+         turnAround();
+     }
+
+}
+
+void moveInDirection(int direction) {
+     rotateToDirection(direction);
+     switch(direction) {
+        case 1:
+             locationX++;
+             break;
+        case 2:
+             locationY--;
+             break;
+        case 3:
+             locationX--;
+             break;
+        case 4:
+             locationY++;
+             break;
+     }
+     moveForward(SPEED);
+}
+
+void moveToTarget() {
+     if (targetX < locationX) {
+        moveInDirection(3);
+     } else if (targetX > locationX) {
+        moveInDirection(1);
+     } else if (targetY < locationY) {
+        moveInDirection(2);
+     } else if (targetY > locationY) {
+        moveInDirection(4);
+     }
+
+     if (locationX == targetX && locationY == targetY) {
+        map[locationX][locationY] = 0;
+        searchTarget = true;
+     }
+}
+
+void rotate90(int direction)
+{
+	RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
+}
+
+void turnRight() {
+    rotate90(DIRECTION_RIGHT);
+}
+
+void turnLeft() {
+    rotate90(DIRECTION_LEFT);
+}
+
+void turnAround() {
+    turnRight();
+    turnRight();
+}
+
+
+
+void moveForward(long speed) {
+    RotateMotor(BOTH_DRIVE, speed, 400);
+    //updateLocation();
+    drawDebug();
+}
+
+void turnRightByAngle(int angle)
+{
+     RotateMotorEx(BOTH_DRIVE, SPEED, 225 / 2 , -DIRECTION_RIGHT * 100, true, true);
+}
+
+void drawMapOuterBorder() {
+    for (int i = 0; i < MAP_DIMATION + 2; i++) {
+        PointOut(i + MAP_LEFT_OFFSET - 1, 0);
+        PointOut(i + MAP_LEFT_OFFSET - 1, MAP_DIMATION + 1);
+        PointOut(MAP_LEFT_OFFSET - 1, i);
+        PointOut(MAP_LEFT_OFFSET - 1 + MAP_DIMATION + 1, i);
+    }
+}
+
+void drawMap() {
+     for (int i = 0; i < MAP_DIMATION; i++) {
+         for (int j = 0; j < MAP_DIMATION; j++) {
+             if (map[i][j]) {
+                PointOut(i + MAP_LEFT_OFFSET, j + MAP_LEFT_BOTTOM);
+             }
+         }
+     }
+}
+
+void drawDebug() {
+     TextOut(0, 10, "px: ");
+     NumOut(17,10, locationX);
+     TextOut(0, 0, "py: ");
+     NumOut(17,0, locationY);
+     
+     TextOut(0, 30, "tx: ");
+     NumOut(17,30, targetX);
+     TextOut(0, 20, "ty: ");
+     NumOut(17,20, targetY);
+}
+
+void draw() {
+    drawDebug();
+    drawMap();
+}
+
+
+task main() {
+     initTestMap();
+     drawMapOuterBorder();
+     drawMap();
+}
+
+task walkTheMap() {
+
+    Follows(main);
+
+    while(drive) {
+        draw();
+        NumOut(0, 40, searchTarget);
+        if (searchTarget) {
+           findNextTarget();
+        }
+        moveToTarget();
+        NumOut(0, 50, searchTarget);
+    }
+}
+
