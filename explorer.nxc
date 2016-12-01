@@ -97,8 +97,8 @@ void reorient() {
 }
 
 bool canMove(short direction) {
-    short pos_new_x = 0;
-    short pos_new_y = 0;
+    short pos_new_x = POS_X;
+    short pos_new_y = POS_Y;
 
     switch (direction) {
         case NORTH: pos_new_y += 1;
@@ -110,19 +110,19 @@ bool canMove(short direction) {
 
     bool result = true;
 
+    if (
+                (pos_new_x > MAP_DIMENSION - 1) ||
+                (pos_new_x < 0) ||
+                (pos_new_y > MAP_DIMENSION - 1) ||
+                (pos_new_y <0)
+            ) 
+    {
+        result = false;
+    } 
+    
     if (MOVE_SPACE[pos_new_x][pos_new_y] == OCCUPIED) {
         result = false;
-    } else {
-
-        if (
-                (pos_new_x > MAP_DIMENSION -1) ||
-                (pos_new_x < 0) ||
-                (pos_new_y > MAP_DIMENSION) ||
-                (pos_new_y <0)
-            ) {
-            result = false;
-        }
-    }
+    } 
 
     return result;
 }
