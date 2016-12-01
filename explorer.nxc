@@ -8,8 +8,8 @@
 #define GROUND_DETECTOR_R IN_3
 #define TOUCH IN_1
 #define ULTRA IN_4
-#define DIRECTION_RIGHT -1
-#define DIRECTION_LEFT 1
+#define DIRECTION_RIGHT 1
+#define DIRECTION_LEFT -1
 #define DIRECTION_BACK 0
 #define NECK_ROT_SPEED 50
 #define SPEED 75
@@ -26,6 +26,7 @@ const char FREE = 'F';
 const char OCCUPIED = 'C';
 const char TARGET = 'T';
 const char EXPLORED = 'E';
+const char BORDER = 'B';
 const short NORTH = 0;
 const short EAST = 1;
 const short SOUTH = 2;
@@ -47,8 +48,8 @@ bool EXPLORE = true;
 // +++ METHODS ++
 
 void initMoveSpace();
-void exploreNextSector(short direction);
-short move(short direction);
+void exploreNextSector();
+void move();
 bool isOccupied();
 short backOff();
 short findNewDirection();
@@ -73,28 +74,66 @@ void initMoveSpace() {
 }
 
 
-void exploreNextSector(short direction) {
-    move(direction);
+void exploreNextSector() {
+    move();
 }
 
 void updateCurrentPosition(short direction) {
     switch (direction) {
         case NORTH: POS_Y += 1;
-        case EAST: POS_X += 1;
+                    break;
+        case EAST:  POS_X += 1;
+                    break;
         case SOUTH: POS_Y += -1;
-        case WEST: POS_X += -1;
+                    break;
+        case WEST:  POS_X += -1;
+                    break;
         default: ;
     }
 }
 
 void reorient() {
     short NEW_DIRECTION = findNewDirection();
-            if (NEW_DIRECTION > CURRENT_DIRECTION) {
-                turnRight();
-            } else {
-                turnLeft();
-            }
-            CURRENT_DIRECTION = NEW_DIRECTION;
+    while (NEW_DIRECTION != CURRENT_DIRECTION) {
+        if (NEW_DIRECTION > CURRENT_DIRECTION) {
+            turnRight();
+            CURRENT_DIRECTION = (CURRENT_DIRECTION + 1) % 4;
+        } else {
+            turnLeft();
+            CURRENT_DIRECTION = (CURRENT_DIRECTION - 1) % 4;
+        }
+    }
+}
+
+short checkArea(short direction) {
+    short pos_area_x = POS_X;
+    short pos_area_y = POS_Y;
+    switch (direction) {
+        case NORTH: pos_area_y += 1;
+                    break;
+        case EAST:  pos_area_x += 1;
+                    break;
+        case SOUTH: pos_area_y += -1;
+                    break;
+        case WEST:  pos_area_x += -1;
+                    break;
+        default: ;
+    }
+
+    char field_value;
+
+    if (
+                (pos_area_x > MAP_DIMENSION - 1) ||
+                (pos_area_x < 0) ||
+                (pos_area_y > MAP_DIMENSION - 1) ||
+                (pos_area_y <0)
+            ) {
+        field_value = BORDER;
+    } else {
+        field_value = MOVE_SPACE[pos_area_x][pos_area_y];
+    }
+
+    return field_value;
 }
 
 bool canMove(short direction) {
@@ -103,9 +142,13 @@ bool canMove(short direction) {
 
     switch (direction) {
         case NORTH: pos_new_y += 1;
-        case EAST: pos_new_x += 1;
+                    break;
+        case EAST:  pos_new_x += 1;
+                    break;
         case SOUTH: pos_new_y += -1;
-        case WEST: pos_new_x += -1;
+                    break;
+        case WEST:  pos_new_x += -1;
+                    break;
         default: ;
     }
 
@@ -119,17 +162,17 @@ bool canMove(short direction) {
             ) 
     {
         result = false;
-    } 
-    
-    if (MOVE_SPACE[pos_new_x][pos_new_y] == OCCUPIED) {
-        result = false;
-    } 
+    } else {    
+        if (MOVE_SPACE[pos_new_x][pos_new_y] == OCCUPIED) {
+            result = false;
+        } 
+    }
 
     return result;
 }
 
-short move(short direction) {
-    if (canMove(direction)) {
+void move() {
+    if (canMove(CURRENT_DIRECTION)) {
         drive(TILE_SIZE, 1);
         if (isOccupied()) {
             updateCurrentPosition(CURRENT_DIRECTION);
@@ -203,7 +246,16 @@ void turnAround() {
 }
 
 short findNewDirection() {
-    return (CURRENT_DIRECTION + 1) % 4;
+    short newDirection = CURRENT_DIRECTION;
+    bool found = false;
+    while (!found) {
+        newDirection = (newDirection + 1) % 4;
+        if (checkArea(newDirection) == FREE)
+            {
+                found = true;
+            }
+    }
+    return newDirection; 
 }
 
 bool checkGround() {
@@ -231,6 +283,6 @@ task explore() {
     Follows (main);
 
     while(EXPLORE) {
-        exploreNextSector(CURRENT_DIRECTION);
+        exploreNextSector();
     }
 }
