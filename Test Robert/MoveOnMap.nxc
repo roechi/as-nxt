@@ -7,7 +7,7 @@
 #define DIRECTION_LEFT -1
 #define DIRECTION_BACK 0
 #define SPEED 50
-int MAP_DIMATION = 50;
+int MAP_DIMATION = 10;
 int MAP_LEFT_OFFSET = 35;
 int MAP_LEFT_BOTTOM = 1;
 
@@ -35,18 +35,24 @@ void turnAround();
 void moveForward(long speed);
 
 void initTestMap() {
-     for (int x = 0; x < MAP_DIMATION; x++) {
-         for (int y = 0; y < MAP_DIMATION; y++) {
-             if (x == y) {
-                 map[x][y] = 1;
-             } else {
-                 map[x][y] = 0;
-             }
-         }
-     }
+    byte m[MAP_DIMATION][MAP_DIMATION] = {
+{1,1,0,0,0,0,0,0,0,0},
+{0,1,1,0,0,0,0,0,0,0},
+{0,0,1,1,1,0,0,0,0,0},
+{0,0,0,0,1,1,0,0,0,0},
+{0,0,0,0,0,1,0,0,0,0},
+{1,1,0,0,0,1,0,0,0,0},
+{0,1,0,0,1,1,0,0,0,0},
+{0,1,1,1,1,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0}
+};
+map = m;
 }
 
 void findNextTarget() {
+     char candidates[9][2];
+     int cIndex = 0;
      for (int x = locationX - 1; x <= locationX + 1; x++) {
          for (int y = locationY -1; y <= locationY + 1; y++) {
              if (x >= 0 &&
@@ -54,13 +60,26 @@ void findNextTarget() {
                 x < MAP_DIMATION &&
                 y < MAP_DIMATION &&
                 map[x][y] == 1) {
-                targetX = x;
-                targetY = y;
-                searchTarget = false;
-                return;
+                candidates[cIndex][0] = x;
+                candidates[cIndex][1] = y;
              }
          }
      }
+     
+     int currentMinD = 10;
+     int targetIndex = 4;
+     
+     for (int i = 0; i <= cIndex; i++) {
+         int d = abs(locationX - candidates[i][0]) + abs(locationY - candidates[i][1]);
+         if (d > 0 && d < currentMinD) {
+            currentMinD = d;
+            targetIndex = i;
+         }
+     }
+     
+     targetX = candidates[targetIndex][0];
+     targetY = candidates[targetIndex][1];
+     searchTarget = false;
 }
 
 void rotateToDirection(int direction) {
@@ -71,19 +90,25 @@ void rotateToDirection(int direction) {
          (direction == 4 && currentDirection == 3) ||
          (direction == 3 && currentDirection == 2) ||
          (direction == 2 && currentDirection == 1)) {
-         turnLeft();
+         turnRight();
+         TextOut(0, 50, "rechts");
      } else if ((direction == 4 && currentDirection == 1) ||
          (direction == 3 && currentDirection == 2) ||
          (direction == 2 && currentDirection == 3) ||
          (direction == 1 && currentDirection == 4)) {
-         turnRight();
+         turnLeft();
+         TextOut(0, 50, "links");
      } else if ((direction == 1 && currentDirection == 3) ||
          (direction == 4 && currentDirection == 2) ||
          (direction == 3 && currentDirection == 1) ||
          (direction == 2 && currentDirection == 4)) {
          turnAround();
+         TextOut(0, 50, "around");
      }
 
+     currentDirection = direction;
+     NumOut(0, 40, currentDirection);
+     NumOut(20, 40, direction);
 }
 
 void moveInDirection(int direction) {
@@ -106,6 +131,11 @@ void moveInDirection(int direction) {
 }
 
 void moveToTarget() {
+     if (locationX == targetX && locationY == targetY) {
+        map[locationX][locationY] = 0;
+        searchTarget = true;
+     }
+
      if (targetX < locationX) {
         moveInDirection(3);
      } else if (targetX > locationX) {
@@ -114,11 +144,6 @@ void moveToTarget() {
         moveInDirection(2);
      } else if (targetY > locationY) {
         moveInDirection(4);
-     }
-
-     if (locationX == targetX && locationY == targetY) {
-        map[locationX][locationY] = 0;
-        searchTarget = true;
      }
 }
 
@@ -140,16 +165,11 @@ void turnAround() {
     turnRight();
 }
 
-
-
 void moveForward(long speed) {
     RotateMotor(BOTH_DRIVE, speed, 400);
-    //updateLocation();
-    drawDebug();
 }
 
-void turnRightByAngle(int angle)
-{
+void turnRightByAngle(int angle) {
      RotateMotorEx(BOTH_DRIVE, SPEED, 225 / 2 , -DIRECTION_RIGHT * 100, true, true);
 }
 
@@ -185,15 +205,15 @@ void drawDebug() {
 }
 
 void draw() {
+    ClearScreen();
     drawDebug();
+    drawMapOuterBorder();
     drawMap();
 }
 
 
 task main() {
      initTestMap();
-     drawMapOuterBorder();
-     drawMap();
 }
 
 task walkTheMap() {
@@ -202,12 +222,10 @@ task walkTheMap() {
 
     while(drive) {
         draw();
-        NumOut(0, 40, searchTarget);
         if (searchTarget) {
            findNextTarget();
         }
         moveToTarget();
-        NumOut(0, 50, searchTarget);
     }
 }
 
