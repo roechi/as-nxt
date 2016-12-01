@@ -181,6 +181,13 @@ void rotate90(int direction)
     RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
 }
 
+void drive(int distance, int direction)
+{
+	int wheelRotationAngle = 2 * PI * WHEEL_RADIUS * distance * direction;
+
+	RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, 0, true, true);
+}
+
 void turnRight() {
     rotate90(DIRECTION_RIGHT);
 }
