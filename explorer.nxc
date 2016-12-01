@@ -62,6 +62,7 @@ void turnLeft();
 void turnAround();
 bool checkGround();
 void initGroundDetectors();
+void drive(int distance, int direction);
 
 void initMoveSpace() {
     for (int x = 0; x < MAP_DIMENSION; x++) {
@@ -129,11 +130,11 @@ bool canMove(short direction) {
 
 short move(short direction) {
     if (canMove(direction)) {
-        moveForward(SPEED);
+        drive(TILE_SIZE, 1);
         if (isOccupied()) {
             updateCurrentPosition(CURRENT_DIRECTION);
             MOVE_SPACE[POS_X][POS_Y] = OCCUPIED;
-            backOff();
+            drive(TILE_SIZE, -1);
             updateCurrentPosition((CURRENT_DIRECTION + 2) % 4);
             reorient();
         } else {
@@ -189,11 +190,11 @@ void drive(int distance, int direction)
 }
 
 void turnRight() {
-    rotate90(DIRECTION_RIGHT);
+    rotateOnSpot(DIRECTION_RIGHT, WHEEL_DISTANCE, WHEEL_RADIUS, 90);
 }
 
 void turnLeft() {
-    rotate90(DIRECTION_LEFT);
+    rotateOnSpot(DIRECTION_LEFT, WHEEL_DISTANCE, WHEEL_RADIUS, 90);
 }
 
 void turnAround() {
@@ -202,7 +203,7 @@ void turnAround() {
 }
 
 short findNewDirection() {
-    CURRENT_DIRECTION = (CURRENT_DIRECTION + 1) % 4;
+    return (CURRENT_DIRECTION + 1) % 4;
 }
 
 bool checkGround() {
