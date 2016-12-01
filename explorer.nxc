@@ -15,6 +15,9 @@
 #define SPEED 75
 #define MAX_US_DISTANCE 25
 #define LIGHT_THRESHOLD 15
+#define WHEEL_RADIUS 2.8
+#define WHEEL_DISTANCE 14
+#define TILE_SIZE 30
 
 // +++ NAVIGATION +++
 
@@ -128,8 +131,10 @@ short move(short direction) {
     if (canMove(direction)) {
         moveForward(SPEED);
         if (isOccupied()) {
+            updateCurrentPosition(CURRENT_DIRECTION);
             MOVE_SPACE[POS_X][POS_Y] = OCCUPIED;
             backOff();
+            updateCurrentPosition((CURRENT_DIRECTION + 2) % 4);
             reorient();
         } else {
             MOVE_SPACE[POS_X][POS_Y] = EXPLORED;
