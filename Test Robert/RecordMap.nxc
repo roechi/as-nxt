@@ -200,7 +200,6 @@ task reactUltra() {
     }
 }
 
-
 //http://www.pages.drexel.edu/~pyo22/mem380Mechatronics2Spring2010-2011/week06/lab/mechatronics2-LabBricMotorVelocityAndDataAcquisition.pdf
 // Create and initialize a file
 /*void InitWriteToFile() {

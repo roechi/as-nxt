@@ -1,0 +1,288 @@
+// +++ ROBOT CONSTANTS ***
+
+#define RIGHT OUT_C
+#define LEFT OUT_B
+#define BOTH_DRIVE OUT_BC
+#define NECK OUT_A
+#define GROUND_DETECTOR_L IN_2
+#define GROUND_DETECTOR_R IN_3
+#define TOUCH IN_1
+#define ULTRA IN_4
+#define DIRECTION_RIGHT 1
+#define DIRECTION_LEFT -1
+#define DIRECTION_BACK 0
+#define NECK_ROT_SPEED 50
+#define SPEED 75
+#define MAX_US_DISTANCE 25
+#define LIGHT_THRESHOLD 15
+#define WHEEL_RADIUS 2.8
+#define WHEEL_DISTANCE 14
+#define TILE_SIZE 30
+
+// +++ NAVIGATION +++
+
+const short MAP_DIMENSION = 3;
+const char FREE = 'F';
+const char OCCUPIED = 'C';
+const char TARGET = 'T';
+const char EXPLORED = 'E';
+const char BORDER = 'B';
+const short NORTH = 0;
+const short EAST = 1;
+const short SOUTH = 2;
+const short WEST = 3;
+const short GOAL = 4;
+
+char MOVE_SPACE[MAP_DIMENSION][MAP_DIMENSION];
+
+short POS_X = 0;
+short POS_Y = 0;
+short CURRENT_DIRECTION = NORTH;
+
+int NORMAL_GROUND_COLOR = 0;
+
+// +++ TASK FLAGS ++
+
+bool EXPLORE = true;
+
+// +++ METHODS ++
+
+void initMoveSpace();
+void exploreNextSector();
+void move();
+bool isOccupied();
+short backOff();
+short findNewDirection();
+void rotateOnSpot(int direction, float wheelDistance, float wheelRadius, int angle);
+void moveForward(long speed);
+void backForward(long speed);
+void stopMove();
+void rotate90(int direction);
+void turnRight();
+void turnLeft();
+void turnAround();
+bool checkGround();
+void initGroundDetectors();
+void drive(int distance, int direction);
+
+void initMoveSpace() {
+    for (int x = 0; x < MAP_DIMENSION; x++) {
+        for (int y = 0; y < MAP_DIMENSION; y++) {
+            MOVE_SPACE[x][y] = FREE;
+        }
+    }
+}
+
+
+void exploreNextSector() {
+    move();
+}
+
+void updateCurrentPosition(short direction) {
+    switch (direction) {
+        case NORTH: POS_Y += 1;
+                    break;
+        case EAST:  POS_X += 1;
+                    break;
+        case SOUTH: POS_Y += -1;
+                    break;
+        case WEST:  POS_X += -1;
+                    break;
+        default: ;
+    }
+}
+
+void reorient() {
+    short NEW_DIRECTION = findNewDirection();
+    while (NEW_DIRECTION != CURRENT_DIRECTION) {
+        if (NEW_DIRECTION > CURRENT_DIRECTION) {
+            turnRight();
+            CURRENT_DIRECTION = (CURRENT_DIRECTION + 1) % 4;
+        } else {
+            turnLeft();
+            CURRENT_DIRECTION = (CURRENT_DIRECTION - 1) % 4;
+        }
+    }
+}
+
+short checkArea(short direction) {
+    short pos_area_x = POS_X;
+    short pos_area_y = POS_Y;
+    switch (direction) {
+        case NORTH: pos_area_y += 1;
+                    break;
+        case EAST:  pos_area_x += 1;
+                    break;
+        case SOUTH: pos_area_y += -1;
+                    break;
+        case WEST:  pos_area_x += -1;
+                    break;
+        default: ;
+    }
+
+    char field_value;
+
+    if (
+                (pos_area_x > MAP_DIMENSION - 1) ||
+                (pos_area_x < 0) ||
+                (pos_area_y > MAP_DIMENSION - 1) ||
+                (pos_area_y <0)
+            ) {
+        field_value = BORDER;
+    } else {
+        field_value = MOVE_SPACE[pos_area_x][pos_area_y];
+    }
+
+    return field_value;
+}
+
+bool canMove(short direction) {
+    short pos_new_x = POS_X;
+    short pos_new_y = POS_Y;
+
+    switch (direction) {
+        case NORTH: pos_new_y += 1;
+                    break;
+        case EAST:  pos_new_x += 1;
+                    break;
+        case SOUTH: pos_new_y += -1;
+                    break;
+        case WEST:  pos_new_x += -1;
+                    break;
+        default: ;
+    }
+
+    bool result = true;
+
+    if (
+                (pos_new_x > MAP_DIMENSION - 1) ||
+                (pos_new_x < 0) ||
+                (pos_new_y > MAP_DIMENSION - 1) ||
+                (pos_new_y <0)
+            ) 
+    {
+        result = false;
+    } else {    
+        if (MOVE_SPACE[pos_new_x][pos_new_y] == OCCUPIED) {
+            result = false;
+        } 
+    }
+
+    return result;
+}
+
+void move() {
+    if (canMove(CURRENT_DIRECTION)) {
+        drive(TILE_SIZE, 1);
+        if (isOccupied()) {
+            updateCurrentPosition(CURRENT_DIRECTION);
+            MOVE_SPACE[POS_X][POS_Y] = OCCUPIED;
+            drive(TILE_SIZE, -1);
+            updateCurrentPosition((CURRENT_DIRECTION + 2) % 4);
+            reorient();
+        } else {
+            MOVE_SPACE[POS_X][POS_Y] = EXPLORED;
+            updateCurrentPosition(CURRENT_DIRECTION);
+        }
+    } else {
+        reorient();
+    }
+}
+
+bool isOccupied() {
+    return checkGround();
+}
+
+
+void rotateOnSpot(int direction, float wheelDistance, float wheelRadius, int angle)
+{
+    int wheelRotationAngle = angle * ((wheelDistance / 2) / wheelRadius);
+
+    RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, (-direction) * 100, true, true);
+}
+
+void moveForward(long speed) {
+
+
+    RotateMotorEx(BOTH_DRIVE, speed, 360, 100, false, true);
+    //OnFwd(BOTH_DRIVE, speed);
+}
+
+void moveBackward(long speed) {
+    moveForward(-1 * speed);
+}
+
+short backOff() {
+    moveBackward(SPEED);
+}
+
+void stopMove() {
+    OnFwd(BOTH_DRIVE, 0);
+}
+
+void rotate90(int direction)
+{   
+    RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
+}
+
+void drive(int distance, int direction)
+{
+	int wheelRotationAngle = 2 * PI * WHEEL_RADIUS * distance * direction;
+
+	RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, 0, true, true);
+}
+
+void turnRight() {
+    rotateOnSpot(DIRECTION_RIGHT, WHEEL_DISTANCE, WHEEL_RADIUS, 90);
+}
+
+void turnLeft() {
+    rotateOnSpot(DIRECTION_LEFT, WHEEL_DISTANCE, WHEEL_RADIUS, 90);
+}
+
+void turnAround() {
+    turnRight();
+    turnRight();
+}
+
+short findNewDirection() {
+    short newDirection = CURRENT_DIRECTION;
+    bool found = false;
+    while (!found) {
+        newDirection = (newDirection + 1) % 4;
+        if (checkArea(newDirection) == FREE)
+            {
+                found = true;
+            }
+    }
+    return newDirection; 
+}
+
+bool checkGround() {
+    SetSensorLight(GROUND_DETECTOR_R);
+    SetSensorLight(GROUND_DETECTOR_L);
+
+    return !((abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_R)) < LIGHT_THRESHOLD) 
+            && (abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_L)) < LIGHT_THRESHOLD));
+}
+
+void initGroundDetectors() {
+    SetSensorLight(GROUND_DETECTOR_R);
+    SetSensorLight(GROUND_DETECTOR_L);
+    
+    NORMAL_GROUND_COLOR = (Sensor(GROUND_DETECTOR_R) + Sensor(GROUND_DETECTOR_L)) / 2;
+}
+// +++ TASKS +++
+
+task main() {
+    initMoveSpace();
+    initGroundDetectors();
+}
+
+task explore() {
+    Follows (main);
+
+    while(EXPLORE) {
+        exploreNextSector();
+    }
+}

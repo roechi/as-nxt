@@ -23,7 +23,7 @@ bool touch = true;
 mutex drive_motors;
 mutex neck_motor;
 
-// +++ FUNXTIONS +++
+// +++ FUNCTIONS +++
 
 void moveForward(long speed) {
     OnFwd(BOTH_DRIVE, speed);
@@ -137,7 +137,6 @@ void lookForNewDirection()
 // +++ TASKS +++
 
 task main() {
-    
 }
 
 task keepMoving() {
