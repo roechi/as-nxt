@@ -1,3 +1,5 @@
+#include "explorer.h"
+
 // +++ ROBOT CONSTANTS ***
 
 #define RIGHT OUT_C
@@ -22,6 +24,8 @@
 // +++ NAVIGATION +++
 
 const short MAP_DIMENSION = 3;
+const short X_DIM = 3;
+const short Y_DIM = 3;
 const char FREE = 'F';
 const char OCCUPIED = 'C';
 const char TARGET = 'T';
@@ -47,34 +51,21 @@ bool EXPLORE = true;
 
 // +++ METHODS ++
 
-void initMoveSpace();
-void exploreNextSector();
-void move();
-bool isOccupied();
-short backOff();
-short findNewDirection();
-void rotateOnSpot(int direction, float wheelDistance, float wheelRadius, int angle);
-void moveForward(long speed);
-void backForward(long speed);
-void stopMove();
-void rotate90(int direction);
-void turnRight();
-void turnLeft();
-void turnAround();
-bool checkGround();
-void initGroundDetectors();
-void drive(int distance, int direction);
 
-void initMoveSpace() {
-    for (int x = 0; x < MAP_DIMENSION; x++) {
-        for (int y = 0; y < MAP_DIMENSION; y++) {
-            MOVE_SPACE[x][y] = FREE;
+void initMoveSpace(char* environmnet, short x_dim, short y_dim) {
+    for (int x = 0; x < x_dim; x++) {
+        for (int y = 0; y < y_dim; y++) {
+            * (environmnet + y * x_dim + x) = FREE;
         }
     }
 }
 
 
-void exploreNextSector() {
+void doStuff(char &environmnet[]) {
+    short directions[4]; 
+
+    see(environmnet, directions, 4);
+
     move();
 }
 
@@ -275,14 +266,18 @@ void initGroundDetectors() {
 // +++ TASKS +++
 
 task main() {
-    initMoveSpace();
     initGroundDetectors();
 }
 
 task explore() {
     Follows (main);
 
+    short environmnet[X_DIM][Y_DIM];
+
+    initMoveSpace(environmnet, X_DIM, Y_DIM)
+
+
     while(EXPLORE) {
-        exploreNextSector();
+        doStuff();
     }
 }
