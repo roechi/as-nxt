@@ -1,6 +1,6 @@
-void initMoveSpace(char* environmnet, short x_dim, short y_dim);
-void doStuff(char &environment[]);
-void see(char &environment[], short &directions, short length);
+void initMoveSpace(char &environment[][], short x_dim, short y_dim);
+void doStuff(char &environment[][]);
+void see(char &environment[][], short &directions[], short length);
 bool isOccupied();
 short backOff();
 short findNewDirection();
@@ -15,3 +15,4 @@ void turnAround();
 bool checkGround();
 void initGroundDetectors();
 void drive(int distance, int direction);
+void move();

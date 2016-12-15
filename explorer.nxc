@@ -52,21 +52,27 @@ bool EXPLORE = true;
 // +++ METHODS ++
 
 
-void initMoveSpace(char* environmnet, short x_dim, short y_dim) {
+void initMoveSpace(char &environment[][], short x_dim, short y_dim) {
     for (int x = 0; x < x_dim; x++) {
         for (int y = 0; y < y_dim; y++) {
-            * (environmnet + y * x_dim + x) = FREE;
+            environment[x][y] = FREE;
+            //*(environment + y * x_dim + x) = FREE;
         }
     }
 }
 
 
-void doStuff(char &environmnet[]) {
+void doStuff(char &environment[][]) {
     short directions[4]; 
 
-    see(environmnet, directions, 4);
+    see(environment, directions, 4);
 
     move();
+}
+
+void see(char &environment[][], short &directions[], short length)
+{
+    // look at my stuff, my stuff is amazing
 }
 
 void updateCurrentPosition(short direction) {
@@ -272,12 +278,12 @@ task main() {
 task explore() {
     Follows (main);
 
-    short environmnet[X_DIM][Y_DIM];
-
-    initMoveSpace(environmnet, X_DIM, Y_DIM)
+    char environment[X_DIM][Y_DIM];
+    //void initMoveSpace(char &environment[], short x_dim, short y_dim);
+    initMoveSpace(environment, X_DIM, Y_DIM);
 
 
     while(EXPLORE) {
-        doStuff();
+        doStuff(environment);
     }
 }
