@@ -2,7 +2,6 @@
 #include "current_State.h"
 
 // +++ ROBOT CONSTANTS ***
-
 #define RIGHT OUT_C
 #define LEFT OUT_B
 #define BOTH_DRIVE OUT_BC
@@ -27,37 +26,32 @@
 const char MAP_DIMENSION = 3;
 const char MAP_DIM_X = 3;
 const char MAP_DIM_Y = 3;
-// Specifier
-const char FREE = 'F';
-const char OCCUPIED = 'C';
-const char TARGET = 'T';
-const char EXPLORED = 'E';
-const char BORDER = 'B';
-// const char GOAL = 'G';
 // Directions
 const char NORTH = 0;
 const char EAST = 1;
 const char SOUTH = 2;
 const char WEST = 3;
+// Field-specifier
+const char FREE = 'F';
+const char OCCUPIED = 'C';
+const char TARGET = 'T';
+const char EXPLORED = 'E';
+const char BORDER = 'B';
 
+// +++ VARIABLES +++
+// field
 char MOVE_SPACE[MAP_DIM_X][MAP_DIM_Y];
-
-// short POS_X = 0;
-// short POS_Y = 0;
-// short CURRENT_DIRECTION = NORTH;
-
-// current State of Explorer
+// current state of explorer
 Current_State current_state;
-
-
+// normal ground color
 int NORMAL_GROUND_COLOR = 0;
 
-// +++ TASK FLAGS ++
 
+// +++ TASK FLAGS ++
 bool EXPLORE = true;
 
 // +++ METHODS ++
-
+// +++ Initialization +++
 
 /* 
  *  Initializes MOVE_SPACE (MAP_DIM_X x MAP_DIM_Y) with FREE ('F')
@@ -87,10 +81,9 @@ void init_ground_detectors() {
     NORMAL_GROUND_COLOR = (Sensor(GROUND_DETECTOR_R) + Sensor(GROUND_DETECTOR_L)) / 2;
 }
 
+// +++ Explorer logic +++
 
 void doStuff() {
-    // short directions[4]; 
-    // see(directions, 4);
 
     move();
 }
@@ -228,7 +221,7 @@ bool can_move(short direction) {
 void move() {
     if (can_move(current_state.direction)) {
         drive(TILE_SIZE, 1);
-        if (isOccupied()) {
+        if (is_occupied()) {
             update_current_position(current_state.direction);
             MOVE_SPACE[current_state.pos_x][current_state.pos_y] = OCCUPIED;
             drive(TILE_SIZE, -1);
@@ -273,8 +266,19 @@ char find_new_direction() {
 /*
  *  Checks if the Ground is occupied.
  */
-bool isOccupied() {
-    return checkGround();
+bool is_occupied() {
+    return check_ground();
+}
+
+/*
+ *  Checks if the current ground color differs from the init value.
+ */
+bool check_ground() {
+    SetSensorLight(GROUND_DETECTOR_R);
+    SetSensorLight(GROUND_DETECTOR_L);
+
+    return !((abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_R)) < LIGHT_THRESHOLD) 
+            && (abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_L)) < LIGHT_THRESHOLD));
 }
 
 /*
@@ -332,14 +336,6 @@ void drive(int distance, int direction)
     int wheelRotationAngle = 2 * PI * WHEEL_RADIUS * distance * direction;
 
     RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, 0, true, true);
-}
-
-bool checkGround() {
-    SetSensorLight(GROUND_DETECTOR_R);
-    SetSensorLight(GROUND_DETECTOR_L);
-
-    return !((abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_R)) < LIGHT_THRESHOLD) 
-            && (abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_L)) < LIGHT_THRESHOLD));
 }
 
 

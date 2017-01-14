@@ -13,8 +13,7 @@ bool can_move(short direction);
 void move()
 char find_new_direction();
 bool isOccupied();
-
-
+bool checkGround();
 
 // Movement
 void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle);
@@ -27,10 +26,5 @@ void turnRight();
 void turnLeft();
 void turnAround();
 void drive(int distance, int direction);
-
-
-bool checkGround();
-
-
 
 
