@@ -172,6 +172,7 @@ bool canMove(short direction) {
 }
 
 void move() {
+    // Just move to next (4neighbor) empty field
     if (canMove(CURRENT_DIRECTION)) {
         drive(TILE_SIZE, 1);
         if (isOccupied()) {
@@ -187,6 +188,9 @@ void move() {
     } else {
         reorient();
     }
+
+    
+
 }
 
 bool isOccupied() {

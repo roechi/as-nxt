@@ -1,0 +1,13 @@
+- serializierung
+
+- bluetooth verbindung
+
+- pathfinding (A*)
+
+- formate
+
+- 
+
+- 
+
+- 
