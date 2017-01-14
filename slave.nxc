@@ -1,12 +1,19 @@
-task main()
+task main ()
 {
     string in, out;
-    while (true)
+    bool run = true;
+    int line = 0;
+    SendResponseBool(MAILBOX1, true);
+    while (run)
     {
-        if (ReceiveMessage (0, true, in) == NO_ERR)
+        NumOut(0, 40, BluetoothStatus(CONN_BT0));
+        NumOut(0, 50, NO_ERR);
+        if (ReceiveRemoteString(MAILBOX1, true, in) == NO_ERR)
         {
-            out = StrCat(in);
-            TextOut (0, LCD_LINE1, out, true);
+            TextOut (0, line * 8, in, true);
+            SendResponseBool(MAILBOX1, true);
+            Wait(1000);
+            line = line + 1;
         }
     }
 }
