@@ -1,5 +1,7 @@
 #include "serialize.h"
 
+void drawMap();
+
 struct Map {
        int x_dim;
        int y_dim;
@@ -14,7 +16,7 @@ void resiveMap() {
 
     bool header_read = false;
     bool read = true;
-    string data;
+    string data = "";
     while (read)
     {
         NumOut(0, 40, BluetoothStatus(CONN_BT0));
@@ -22,22 +24,29 @@ void resiveMap() {
         string in;
         if (ReceiveRemoteString(MAILBOX1, true, in) == NO_ERR)
         {
-            TextOut (0, 0, in, true);
+            TextOut (0, 0, in);
             if (in == "FIN") {
                   read = false;
             }
 
-            if (header_read) {
-               data = StrCat(data, in);
+            if (header_read && read) {
+                string temp = StrCat(data, in);
+                data = temp;
             }
 
             if (SubStr(in, 0, 1) == "#" && !header_read) {
               int x_dim;
               int y_dim;
               parseHeader(in, x_dim, y_dim, cs);
+
+              
+
               map.x_dim = x_dim;
               map.y_dim = y_dim;
+
               char m[map.x_dim][map.y_dim];
+              
+              
               map.data = m;
               header_read = true;
             }
@@ -49,8 +58,19 @@ void resiveMap() {
     NumOut(0, 30, 0);
     Wait(1000);
     deserialize(data, map.x_dim, map.y_dim, map.data);
+    ClearScreen();
+    drawMap();
+    Wait(10000);
 }
 
+void drawMap() {
+     for (int i = 0; i < map.x_dim; i++) {
+         for (int j = 0; j < map.y_dim; j++) {
+            if (map.data[i][j] == 'O')
+             PointOut(i,j);
+         }
+     }
+}
 
 task main ()
 {
