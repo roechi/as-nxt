@@ -5,15 +5,28 @@ string serialize(char & in[][])
 
 void deserialize(string in, int x_dim, int y_dim, char & out[][])
 {
+  NumOut(0, 30, 10);
+  Wait(1000);
 	char temp[];
+	NumOut(0, 30, 0);
+	Wait(1000);
 	UnflattenVar(in, temp);
-
+  NumOut(0, 30, 1);
+  Wait(1000);
 	for (int i = 0; i < x_dim; i++)
 	{
+	  NumOut(0, 30, 2);
+	  Wait(1000);
 		for (int j = 0; j < y_dim; j++)
 		{
+      NumOut(0, 30, 3);
+      Wait(1000);
 			int pos = i * y_dim + j;
+			NumOut(0, 30, 4);
+			Wait(1000);
 			out[i][j] = temp[pos];
+			NumOut(0, 30, 5);
+			Wait(1000);
 		}
 	}
 }

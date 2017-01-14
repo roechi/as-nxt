@@ -37,6 +37,8 @@ void resiveMap() {
               parseHeader(in, x_dim, y_dim, cs);
               map.x_dim = x_dim;
               map.y_dim = y_dim;
+              char m[map.x_dim][map.y_dim];
+              map.data = m;
               header_read = true;
             }
 
@@ -44,8 +46,9 @@ void resiveMap() {
             Wait(1000);
         }
     }
-    
-    deserialize(data, map.data);
+    NumOut(0, 30, 0);
+    Wait(1000);
+    deserialize(data, map.x_dim, map.y_dim, map.data);
 }
 
 
@@ -55,6 +58,6 @@ task main ()
     bool read = true;
     int line = 0;
     SendResponseBool(MAILBOX1, true);
-    
-
+    resiveMap();
+    TextOut (0, 0, "done", true);
 }
