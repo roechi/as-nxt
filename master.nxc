@@ -1,0 +1,56 @@
+#include "serialize.h"
+
+const int X_DIM = 8;
+const int Y_DIM = 8;
+const int CHUNK_SIZE = 25;
+    
+void initMoveSpace(char & in[][], int x_dim, int y_dim);
+
+void BTWait (){
+    bool temp = false; 
+    until(ReceiveRemoteBool(MAILBOX1, true, temp) == NO_ERR);
+}
+
+void BTFlush (int connection){
+    byte temp; 
+    while(ReceiveMessage(MAILBOX1, true, temp) == NO_ERR);
+}
+
+task main()
+{
+    NumOut(0, 40, BluetoothStatus(CONN_BT1));
+    NumOut(0, 50, NO_ERR);
+    
+    BTWait();
+
+    TextOut(0, 0, "begin");
+
+    char foo[X_DIM][Y_DIM];
+    
+    initMoveSpace(foo, X_DIM, Y_DIM);
+
+    string msg = serialize(foo);
+
+    int last_chunk = SizeOf(foo) % CHUNK_SIZE;
+    
+
+    int num_of_chunks = SizeOf(foo) - last_chunk / CHUNK_SIZE;  
+
+    for (int i = 0; i < num_of_chunks; i++)
+    {
+        string chunk = SubStr(msg, i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+        SendRemoteString(1, 0, chunk);
+
+        BTWait();        
+    }
+    string chunk = SubStr(msg, num_of_chunks * CHUNK_SIZE, SizeOf(foo));
+    SendRemoteString(1, 0, chunk);
+}
+
+void initMoveSpace(char & in[][], int x_dim, int y_dim) {
+    for (int x = 0; x < x_dim; x++) {
+        for (int y = 0; y < y_dim; y++) {
+            in[x][y] = 'O';
+        }
+    }
+}

@@ -1,0 +1,12 @@
+task main()
+{
+    string in, out;
+    while (true)
+    {
+        if (ReceiveMessage (0, true, in) == NO_ERR)
+        {
+            out = StrCat(in);
+            TextOut (0, LCD_LINE1, out, true);
+        }
+    }
+}
