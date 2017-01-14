@@ -2,6 +2,7 @@
 
 #include "explorer.h"
 #include "a_star_algorithm.h"
+#include "stack.h"
 
 
 // +++ TASK FLAGS ++
@@ -29,6 +30,13 @@ void init_current_state(char x, char y, char direction) {
     current_state.pos_x = (x < MAP_DIM_X) ? x : 0;
     current_state.pos_y = (y < MAP_DIM_Y) ? y : 0;
     current_state.direction = (direction >= NORTH && direction <= WEST) ? direction : NORTH;
+
+	// Add start position to stack
+	Position tmp;
+	tmp.x = current_state.pos_x;
+	tmp.y = current_state.pos_y;
+	
+	stack.push(tmp);
 }
 
 void init_ground_detectors() {
@@ -95,7 +103,22 @@ void reorient() {
     char new_direction = find_new_direction(); //-1 is possible
     //TMP TODO: no clean solution
     if(new_direction == -1)
+	{
+		Position current = stack.pop();
+		Position target = stack.space[stack.last_element];
+		
+		A_Star_Position pos_start;
+		pos.x = current.x;
+		pos.y = current.y;
+		
+		A_Star_Position pos_target;
+		pos_target.x = target.x;
+		pos_target.y = target.y;
+		
+		a_star_calculate_path(pos_start, pos_target);
+		
         return;
+	}
 
     while (new_direction != current_state.direction) {
         if (new_direction > current_state.direction) {
@@ -200,6 +223,12 @@ void move() {
     } else {
 		update_current_position(current_state.direction);
 		MOVE_SPACE[current_state.pos_x][current_state.pos_y] = EXPLORED;
+		
+		Position tmp;
+		tmp.x = current_state.pos_x;
+		tmp.y = current_state.pos_y;
+		
+		stack.push(tmp);		
 	}
 }
 

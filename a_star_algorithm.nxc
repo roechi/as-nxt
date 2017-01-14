@@ -1,17 +1,12 @@
-#include "defines.h"
-
 #include "a_star_algorithm.h"
 
-#define A_STAR_SIZE_X 3
-#define A_STAR_SIZE_Y 3
 #define A_STAR_NEARBOURS 4
 
 unsigned char a_star_last_id;
 
-#define A_STAR_LIST_SIZE 127
-A_Star_Node a_star_open_list[A_STAR_LIST_SIZE];
-A_Star_Node a_star_closed_list[A_STAR_LIST_SIZE];
-A_Star_Node a_star_reversed_path[A_STAR_LIST_SIZE];
+A_Star_Node a_star_open_list[LIST_SIZE];
+A_Star_Node a_star_closed_list[LIST_SIZE];
+A_Star_Node a_star_reversed_path[LIST_SIZE];
 
 
 void a_star_calculate_path(A_Star_Position a_star_start, A_Star_Position a_star_target)
@@ -53,7 +48,7 @@ short a_star_is_in_open_list(A_Star_Node node)
 {
 	short index = -1;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE && index == -1; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE && index == -1; ++i)
 	{
 		if (a_star_compare_positions(a_star_open_list[i].pos, node.pos))
 			index = i;
@@ -66,7 +61,7 @@ short a_star_is_in_closed_list(A_Star_Node node)
 {
 	short index = -1;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE && index == -1; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE && index == -1; ++i)
 	{
 		if (a_star_compare_positions(a_star_closed_list[i].pos, node.pos))
 			index = i;
@@ -79,7 +74,7 @@ bool a_star_add_to_open_list(A_Star_Node node)
 {
 	bool is_set = false;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE && !is_set; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE && !is_set; ++i)
 	{
 		if (!a_star_is_valid_position(a_star_open_list[i].pos))
 		{
@@ -95,7 +90,7 @@ bool a_star_add_to_closed_list(A_Star_Node node)
 {
 	bool is_set = false;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE && !is_set; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE && !is_set; ++i)
 	{
 		if (!a_star_is_valid_position(a_star_closed_list[i].pos))
 		{
@@ -149,7 +144,7 @@ unsigned char a_star_count_open_list_elements()
 {
 	unsigned char counter = 0;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE; ++i)
 	{
 		if (a_star_is_valid_position(a_star_open_list[i].pos))
 			++counter;
@@ -162,7 +157,7 @@ unsigned char a_star_count_closed_list_elements()
 {
 	unsigned char counter = 0;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE; ++i)
 	{
 		if (a_star_is_valid_position(a_star_closed_list[i].pos))
 			++counter;
@@ -179,7 +174,7 @@ void a_star_clear_lists()
 	default_node.distance = 0;
 	default_node.previous_node = 0;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE; ++i)
 	{
 		a_star_open_list[i] = default_node;
 		a_star_closed_list[i] = default_node;
@@ -190,7 +185,7 @@ short a_star_get_open_list_index_by_id(unsigned char id)
 {
 	short index = -1;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE && index == -1; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE && index == -1; ++i)
 	{
 		if (a_star_open_list[i].id == id)
 			index = i;
@@ -203,7 +198,7 @@ short a_star_get_closed_list_index_by_id(unsigned char id)
 {
 	short index = -1;
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE && index == -1; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE && index == -1; ++i)
 	{
 		if (a_star_closed_list[i].id == id)
 			index = i;
@@ -220,7 +215,7 @@ bool a_star_compare_positions(A_Star_Position lhs, A_Star_Position rhs)
 bool a_star_is_valid_position(A_Star_Position position)
 {
 	return position.x != -1 && position.y != -1 &&
-		   position.x < A_STAR_SIZE_X && position.y < A_STAR_SIZE_Y;
+		   position.x < MAP_DIM_X && position.y < MAP_DIM_Y;
 }
 
 bool a_star_is_position_accessible(A_Star_Position position)
@@ -245,7 +240,7 @@ A_Star_Node a_star_get_node_with_minimum_distance()
 	unsigned short min_distance = -1;	// Max unsigned short
 	
 	
-	for (unsigned char i = 0; i < A_STAR_LIST_SIZE; ++i)
+	for (unsigned char i = 0; i < LIST_SIZE; ++i)
 	{
 		if (a_star_is_valid_position(a_star_open_list[i].pos))
 		{
@@ -325,7 +320,7 @@ void a_star_build_path(A_Star_Node a_star_target)
 		a_star_reversed_path[index++] = current_node;
 	}
 	
-	for (unsigned char i = index; i < A_STAR_LIST_SIZE; ++i)
+	for (unsigned char i = index; i < LIST_SIZE; ++i)
 	{
 		a_star_reversed_path[i].id = 0;
 	}

@@ -44,3 +44,7 @@ char MOVE_SPACE[MAP_DIM_X][MAP_DIM_Y];
 Current_State current_state;
 // normal ground color
 int NORMAL_GROUND_COLOR = 0;
+
+
+// +++ A-Star Algorithm +++
+const unsigned char LIST_SIZE = 255;
