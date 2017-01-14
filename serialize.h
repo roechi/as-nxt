@@ -3,9 +3,19 @@ string serialize(char & in[][])
 	return FlattenVar(in);
 }
 
-void deserialize(string in, char & out[][])
+void deserialize(string in, int x_dim, int y_dim, char & out[][])
 {
-	UnflattenVar(in, out);
+	char temp[];
+	UnflattenVar(in, temp);
+
+	for (int i = 0; i < x_dim; i++)
+	{
+		for (int j = 0; j < y_dim; j++)
+		{
+			int pos = i * y_dim + j;
+			out[i][j] = temp[pos];
+		}
+	}
 }
 
 string createHeader(int x_dim, int y_dim, int chunk_size)
