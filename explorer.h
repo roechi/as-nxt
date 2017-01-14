@@ -11,8 +11,8 @@ void reorient();
 char get_field_in_direction(char direction);
 bool can_move(short direction);
 void move()
+char find_new_direction();
 bool isOccupied();
-
 
 
 
@@ -28,8 +28,6 @@ void turnLeft();
 void turnAround();
 void drive(int distance, int direction);
 
-
-char find_new_direction();
 
 bool checkGround();
 

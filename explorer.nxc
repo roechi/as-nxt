@@ -202,12 +202,11 @@ bool can_move(short direction) {
     bool result = true;
 
     if (
-                (pos_new_x > MAP_DIMENSION - 1) ||
-                (pos_new_x < 0) ||
-                (pos_new_y > MAP_DIMENSION - 1) ||
-                (pos_new_y <0)
-            ) 
-    {
+            (pos_new_x > MAP_DIMENSION - 1) ||
+            (pos_new_x < 0) ||
+            (pos_new_y > MAP_DIMENSION - 1) ||
+            (pos_new_y <0)
+        ) {
         result = false;
     } else {    
         if (MOVE_SPACE[pos_new_x][pos_new_y] == OCCUPIED) {
@@ -242,6 +241,33 @@ void move() {
     } else {
         reorient();
     }
+}
+
+/*
+ *  Looks at each direction (turning right from the current direction).
+ *  If a FREE field is found this direction is returned.
+
+ *  TODO: - If no FREE field is found we are running into an error! (-1 will be returned!)
+ *        - A*-Algorithm?!  
+*/
+char find_new_direction() {
+    char newDirection = current_state.direction;
+    bool found = false;
+    char counter = 0;
+    while (!found) {
+        newDirection = (newDirection + 1) % 4;
+        if (get_field_in_direction(newDirection) == FREE) {
+            found = true;
+        }
+        // All directions checked + nothing FREE
+        if(counter == 4) {
+            //return Error value
+            newDirection = -1;
+            found = true;
+        }
+        ++counter;
+    }
+    return newDirection; 
 }
 
 /*
@@ -306,33 +332,6 @@ void drive(int distance, int direction)
     int wheelRotationAngle = 2 * PI * WHEEL_RADIUS * distance * direction;
 
     RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, 0, true, true);
-}
-
-/*
- *  Looks at each direction (turning right from the current direction).
- *  If a FREE field is found this direction is returned.
-
- *  TODO: - If no FREE field is found we are running into an error! (-1 will be returned!)
- *        - A*-Algorithm?!  
-*/
-char find_new_direction() {
-    char newDirection = current_state.direction;
-    bool found = false;
-    char counter = 0;
-    while (!found) {
-        newDirection = (newDirection + 1) % 4;
-        if (get_field_in_direction(newDirection) == FREE) {
-            found = true;
-        }
-        // All directions checked + nothing FREE
-        if(counter == 4) {
-            //return Error value
-            newDirection = -1;
-            found = true;
-        }
-        ++counter;
-    }
-    return newDirection; 
 }
 
 bool checkGround() {
