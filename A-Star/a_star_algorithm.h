@@ -1,5 +1,3 @@
-const unsigned char A_STAR_LIST_SIZE = 127;
-
 struct A_Star_Position
 {
 	char x;							// max 127
@@ -9,16 +7,12 @@ struct A_Star_Position
 struct A_Star_Node
 {
 	A_Star_Position pos;
-	unsigned short distance;		// max 65K
+	short distance;		// max 65K
 	unsigned char previous_node;	// max 255
 	unsigned char id;
 };
 
-A_Star_Node a_star_open_list[A_STAR_LIST_SIZE];
-A_Star_Node a_star_closed_list[A_STAR_LIST_SIZE];
-A_Star_Node a_star_reversed_path[A_STAR_LIST_SIZE];
-
-void a_star_calculate_path(A_Star_Position start, A_Star_Position target);
+void a_star_calculate_path(A_Star_Position a_star_start, A_Star_Position a_star_target);
 
 unsigned char a_star_get_new_id();
 
@@ -41,6 +35,6 @@ bool a_star_is_position_accessible(A_Star_Position position);
 A_Star_Node a_star_get_node_with_minimum_distance();
 void a_star_set_nearbours_to_open_list(A_Star_Node current_node);
 
-void a_star_build_path(A_Star_Node target);
+void a_star_build_path(A_Star_Node a_star_target);
 
 
