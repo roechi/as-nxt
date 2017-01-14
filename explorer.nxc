@@ -25,8 +25,8 @@
 // +++ NAVIGATION +++
 // Dimensions
 const char MAP_DIMENSION = 3;
-const char X_DIM = 3;
-const char Y_DIM = 3;
+const char MAP_DIM_X = 3;
+const char MAP_DIM_Y = 3;
 // Specifier
 const char FREE = 'F';
 const char OCCUPIED = 'C';
@@ -40,7 +40,7 @@ const char EAST = 1;
 const char SOUTH = 2;
 const char WEST = 3;
 
-char MOVE_SPACE[X_DIM][Y_DIM];
+char MOVE_SPACE[MAP_DIM_X][MAP_DIM_Y];
 
 // short POS_X = 0;
 // short POS_Y = 0;
@@ -60,11 +60,11 @@ bool EXPLORE = true;
 
 
 /* 
- *  Initializes MOVE_SPACE (X_DIM x Y_DIM) with FREE ('F')
+ *  Initializes MOVE_SPACE (MAP_DIM_X x MAP_DIM_Y) with FREE ('F')
  */
-void initMoveSpace() {
-    for (int x = 0; x < X_DIM; x++) {
-        for (int y = 0; y < Y_DIM; y++) {
+void init_MoveSpace() {
+    for (int x = 0; x < MAP_DIM_X; x++) {
+        for (int y = 0; y < MAP_DIM_Y; y++) {
             MOVE_SPACE[x][y] = FREE;
         }
     }
@@ -73,57 +73,82 @@ void initMoveSpace() {
 /*
  *  Initializes current_state to given x, y and direction.
  *  If the given values are not valid, defaults are used.
-*/
+ */
 void init_current_state(char x, char y, char direction) {
-    current_state.pos_x = (x < X_DIM) ? x : 0;
-    current_state.pos_y = (y < Y_DIM) ? y : 0;
+    current_state.pos_x = (x < MAP_DIM_X) ? x : 0;
+    current_state.pos_y = (y < MAP_DIM_Y) ? y : 0;
     current_state.direction = (direction >= NORTH && direction <= WEST) ? direction : NORTH;
+}
+
+void init_ground_detectors() {
+    SetSensorLight(GROUND_DETECTOR_R);
+    SetSensorLight(GROUND_DETECTOR_L);
+    
+    NORMAL_GROUND_COLOR = (Sensor(GROUND_DETECTOR_R) + Sensor(GROUND_DETECTOR_L)) / 2;
 }
 
 
 void doStuff() {
-    short directions[4]; 
-
-    see(directions, 4);
+    // short directions[4]; 
+    // see(directions, 4);
 
     move();
 }
 
-void see(short &directions[], short directions_length)
+void see()
 {
     // look at my stuff, my stuff is amazing
 }
 
-void updateCurrentPosition(short direction) {
+/*
+ *  Updates the current Position (int current_state) 
+ *  with the given direction.
+ */
+void update_current_position(char direction) {
     switch (direction) {
-        case NORTH: POS_Y += 1;
+        case NORTH: current_state.pos_y += 1;
                     break;
-        case EAST:  POS_X += 1;
+        case EAST:  current_state.pos_x += 1;
                     break;
-        case SOUTH: POS_Y += -1;
+        case SOUTH: current_state.pos_y += -1;
                     break;
-        case WEST:  POS_X += -1;
+        case WEST:  current_state.pos_x += -1;
                     break;
         default: ;
     }
 }
 
+/*
+ *  Searches for new possible directions. If no new way is possible
+ *  nothing happens! Otherwise direction of current_state is updated and
+ *  the robot will rotate.
+ *
+ *  TODO: find clean solution if there is no new direction
+ */
 void reorient() {
-    short NEW_DIRECTION = findNewDirection();
-    while (NEW_DIRECTION != CURRENT_DIRECTION) {
-        if (NEW_DIRECTION > CURRENT_DIRECTION) {
+    char new_direction = find_new_direction(); //-1 is possible
+    //TMP TODO: no clean solution
+    if(new_direction == -1)
+        return;
+
+    while (new_direction != current_state.direction) {
+        if (new_direction > current_state.direction) {
             turnRight();
-            CURRENT_DIRECTION = (CURRENT_DIRECTION + 1) % 4;
+            current_state.direction = (current_state.direction + 1) % 4;
         } else {
             turnLeft();
-            CURRENT_DIRECTION = (CURRENT_DIRECTION - 1) % 4;
+            current_state.direction = (current_state.direction - 1) % 4;
         }
     }
 }
 
-short checkArea(short direction) {
-    short pos_area_x = POS_X;
-    short pos_area_y = POS_Y;
+/*
+ *  Returns the value of the field next to the current
+ *  position into the given direction.
+ */
+char get_field_in_direction(char direction) {
+    char pos_area_x = current_state.pos_x;
+    char pos_area_y = current_state.pos_y;
     switch (direction) {
         case NORTH: pos_area_y += 1;
                     break;
@@ -139,9 +164,9 @@ short checkArea(short direction) {
     char field_value;
 
     if (
-                (pos_area_x > MAP_DIMENSION - 1) ||
+                (pos_area_x > MAP_DIM_X - 1) ||
                 (pos_area_x < 0) ||
-                (pos_area_y > MAP_DIMENSION - 1) ||
+                (pos_area_y > MAP_DIM_Y - 1) ||
                 (pos_area_y <0)
             ) {
         field_value = BORDER;
@@ -153,14 +178,14 @@ short checkArea(short direction) {
 }
 
 /*
-    Checks wether the current position + 
-    one step to the given direction would result in a 
-    valid position (FREE, TARGET, EXPLORED) (true is returned), or a 
-    blocked position (OCCUPIED, BORDER) (false is returned).
-*/
-bool canMove(short direction) {
-    short pos_new_x = POS_X;
-    short pos_new_y = POS_Y;
+ *  Checks wether the current position + 
+ *  one step to the given direction would result in a 
+ *  valid position (FREE, TARGET, EXPLORED) (true is returned), or a 
+ *  blocked position (OCCUPIED, BORDER) (false is returned).
+ */
+bool can_move(short direction) {
+    short pos_new_x = current_state.pos_x;
+    short pos_new_y = current_state.pos_y;
 
     switch (direction) {
         case NORTH: pos_new_y += 1;
@@ -193,47 +218,63 @@ bool canMove(short direction) {
     return result;
 }
 
+/*
+ *  Explorer-Robot tries to move in current direction.
+ *  If the field is OCCUPIED, it will be marked (as OCCUPIED) in the MOVE_SPACE 
+ *  and the the robot will go back. Reoriantation follows.
+ *  If the field is FREE, the field will marked (as EXPLORED) in the MMOVE_SPACE
+ *  and the robot will go to this position.
+ *  If the current Direction is not possible a reoriantation is launched.
+ */
 void move() {
-    if (canMove(CURRENT_DIRECTION)) {
+    if (can_move(current_state.direction)) {
         drive(TILE_SIZE, 1);
         if (isOccupied()) {
-            updateCurrentPosition(CURRENT_DIRECTION);
-            MOVE_SPACE[POS_X][POS_Y] = OCCUPIED;
+            update_current_position(current_state.direction);
+            MOVE_SPACE[current_state.pos_x][current_state.pos_y] = OCCUPIED;
             drive(TILE_SIZE, -1);
-            updateCurrentPosition((CURRENT_DIRECTION + 2) % 4);
+            update_current_position((current_state.direction + 2) % 4);
             reorient();
         } else {
-            MOVE_SPACE[POS_X][POS_Y] = EXPLORED;
-            updateCurrentPosition(CURRENT_DIRECTION);
+            MOVE_SPACE[current_state.pos_x][current_state.pos_y] = EXPLORED;
+            update_current_position(current_state.direction);
         }
     } else {
         reorient();
     }
 }
 
+/*
+ *  Checks if the Ground is occupied.
+ */
 bool isOccupied() {
     return checkGround();
 }
 
-
-void rotateOnSpot(int direction, float wheelDistance, float wheelRadius, int angle)
+/*
+ *  Rotates the robot on his position.
+ *  direction = 1: right
+ *  direction = -1: left
+ */
+void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle)
 {
     int wheelRotationAngle = angle * ((wheelDistance / 2) / wheelRadius);
 
     RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, (-direction) * 100, true, true);
 }
 
-void moveForward(long speed) {
+
+void moveForward(char speed) {
 //void RotateMotorEx(byte outputs,char pwr, long angle, char turnpct, bool sync, bool stop)   
     RotateMotorEx(BOTH_DRIVE, speed, 360, 100, true, true);
     //OnFwd(BOTH_DRIVE, speed);
 }
 
-void moveBackward(long speed) {
+void moveBackward(char speed) {
     moveForward(-1 * speed);
 }
 
-short backOff() {
+void backOff() {
     moveBackward(SPEED);
 }
 
@@ -241,16 +282,10 @@ void stopMove() {
     OnFwd(BOTH_DRIVE, 0);
 }
 
-void rotate90(int direction)
+void rotate90(char direction)
 {   
-    RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
-}
-
-void drive(int distance, int direction)
-{
-	int wheelRotationAngle = 2 * PI * WHEEL_RADIUS * distance * direction;
-
-	RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, 0, true, true);
+    rotateOnSpot(direction, WHEEL_DISTANCE, WHEEL_RADIUS, 90);
+    // RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
 }
 
 void turnRight() {
@@ -266,15 +301,36 @@ void turnAround() {
     turnRight();
 }
 
-short findNewDirection() {
-    short newDirection = CURRENT_DIRECTION;
+void drive(int distance, int direction)
+{
+    int wheelRotationAngle = 2 * PI * WHEEL_RADIUS * distance * direction;
+
+    RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, 0, true, true);
+}
+
+/*
+ *  Looks at each direction (turning right from the current direction).
+ *  If a FREE field is found this direction is returned.
+
+ *  TODO: - If no FREE field is found we are running into an error! (-1 will be returned!)
+ *        - A*-Algorithm?!  
+*/
+char find_new_direction() {
+    char newDirection = current_state.direction;
     bool found = false;
+    char counter = 0;
     while (!found) {
         newDirection = (newDirection + 1) % 4;
-        if (checkArea(newDirection) == FREE)
-            {
-                found = true;
-            }
+        if (get_field_in_direction(newDirection) == FREE) {
+            found = true;
+        }
+        // All directions checked + nothing FREE
+        if(counter == 4) {
+            //return Error value
+            newDirection = -1;
+            found = true;
+        }
+        ++counter;
     }
     return newDirection; 
 }
@@ -287,27 +343,22 @@ bool checkGround() {
             && (abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_L)) < LIGHT_THRESHOLD));
 }
 
-void initGroundDetectors() {
-    SetSensorLight(GROUND_DETECTOR_R);
-    SetSensorLight(GROUND_DETECTOR_L);
-    
-    NORMAL_GROUND_COLOR = (Sensor(GROUND_DETECTOR_R) + Sensor(GROUND_DETECTOR_L)) / 2;
-}
+
 // +++ TASKS +++
 
 task main() {
-    initGroundDetectors();
+    init_ground_detectors();
 }
 
 task explore() {
     Follows (main);
 
-    // char environment[X_DIM][Y_DIM];
-    //void initMoveSpace(char &environment[], short x_dim, short y_dim);
-    initMoveSpace(environment, X_DIM, Y_DIM);
+    // char environment[MAP_DIM_X][MAP_DIM_Y];
+    //void initMoveSpace(char &environment[], short MAP_DIM_X, short MAP_DIM_Y);
+    init_MoveSpace(environment, MAP_DIM_X, MAP_DIM_Y);
     init_current_state(0,0,NORTH);
 
     while(EXPLORE) {
-        doStuff(environment);
+        doStuff();
     }
 }
