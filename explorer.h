@@ -1,6 +1,6 @@
 void initMoveSpace();
-void doStuff(char &environment[][]);
-void see(char &environment[][], short &directions[], short length);
+void doStuff();
+void see(short &directions[], short directions_length);
 bool isOccupied();
 short backOff();
 short findNewDirection();

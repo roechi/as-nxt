@@ -1,4 +1,5 @@
 #include "explorer.h"
+#include "current_State.h"
 
 // +++ ROBOT CONSTANTS ***
 
@@ -22,26 +23,32 @@
 #define TILE_SIZE 30
 
 // +++ NAVIGATION +++
-
-const short MAP_DIMENSION = 3;
-const short X_DIM = 3;
-const short Y_DIM = 3;
+// Dimensions
+const char MAP_DIMENSION = 3;
+const char X_DIM = 3;
+const char Y_DIM = 3;
+// Specifier
 const char FREE = 'F';
 const char OCCUPIED = 'C';
 const char TARGET = 'T';
 const char EXPLORED = 'E';
 const char BORDER = 'B';
-const short NORTH = 0;
-const short EAST = 1;
-const short SOUTH = 2;
-const short WEST = 3;
-const short GOAL = 4;
+// const char GOAL = 'G';
+// Directions
+const char NORTH = 0;
+const char EAST = 1;
+const char SOUTH = 2;
+const char WEST = 3;
 
 char MOVE_SPACE[X_DIM][Y_DIM];
 
-short POS_X = 0;
-short POS_Y = 0;
-short CURRENT_DIRECTION = NORTH;
+// short POS_X = 0;
+// short POS_Y = 0;
+// short CURRENT_DIRECTION = NORTH;
+
+// current State of Explorer
+Current_State current_state;
+
 
 int NORMAL_GROUND_COLOR = 0;
 
@@ -52,6 +59,9 @@ bool EXPLORE = true;
 // +++ METHODS ++
 
 
+/* 
+ *  Initializes MOVE_SPACE (X_DIM x Y_DIM) with FREE ('F')
+ */
 void initMoveSpace() {
     for (int x = 0; x < X_DIM; x++) {
         for (int y = 0; y < Y_DIM; y++) {
@@ -60,16 +70,26 @@ void initMoveSpace() {
     }
 }
 
+/*
+ *  Initializes current_state to given x, y and direction.
+ *  If the given values are not valid, defaults are used.
+*/
+void init_current_state(char x, char y, char direction) {
+    current_state.pos_x = (x < X_DIM) ? x : 0;
+    current_state.pos_y = (y < Y_DIM) ? y : 0;
+    current_state.direction = (direction >= NORTH && direction <= WEST) ? direction : NORTH;
+}
 
-void doStuff(char &environment[][]) {
+
+void doStuff() {
     short directions[4]; 
 
-    see(environment, directions, 4);
+    see(directions, 4);
 
     move();
 }
 
-void see(char &environment[][], short &directions[], short length)
+void see(short &directions[], short directions_length)
 {
     // look at my stuff, my stuff is amazing
 }
@@ -132,6 +152,12 @@ short checkArea(short direction) {
     return field_value;
 }
 
+/*
+    Checks wether the current position + 
+    one step to the given direction would result in a 
+    valid position (FREE, TARGET, EXPLORED) (true is returned), or a 
+    blocked position (OCCUPIED, BORDER) (false is returned).
+*/
 bool canMove(short direction) {
     short pos_new_x = POS_X;
     short pos_new_y = POS_Y;
@@ -276,10 +302,10 @@ task main() {
 task explore() {
     Follows (main);
 
-    char environment[X_DIM][Y_DIM];
+    // char environment[X_DIM][Y_DIM];
     //void initMoveSpace(char &environment[], short x_dim, short y_dim);
     initMoveSpace(environment, X_DIM, Y_DIM);
-
+    init_current_state(0,0,NORTH);
 
     while(EXPLORE) {
         doStuff(environment);
