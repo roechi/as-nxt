@@ -1,50 +1,7 @@
+#include "defines.h"
+
 #include "explorer.h"
-#include "current_State.h"
-
-// +++ ROBOT CONSTANTS ***
-#define RIGHT OUT_C
-#define LEFT OUT_B
-#define BOTH_DRIVE OUT_BC
-#define NECK OUT_A
-#define GROUND_DETECTOR_L IN_2
-#define GROUND_DETECTOR_R IN_3
-#define TOUCH IN_1
-#define ULTRA IN_4
-#define DIRECTION_RIGHT 1
-#define DIRECTION_LEFT -1
-#define DIRECTION_BACK 0
-#define NECK_ROT_SPEED 50
-#define SPEED 75
-#define MAX_US_DISTANCE 25
-#define LIGHT_THRESHOLD 15
-#define WHEEL_RADIUS 2.8
-#define WHEEL_DISTANCE 14
-#define TILE_SIZE 30
-
-// +++ NAVIGATION +++
-// Dimensions
-const char MAP_DIMENSION = 3;
-const char MAP_DIM_X = 3;
-const char MAP_DIM_Y = 3;
-// Directions
-const char NORTH = 0;
-const char EAST = 1;
-const char SOUTH = 2;
-const char WEST = 3;
-// Field-specifier
-const char FREE = 'F';
-const char OCCUPIED = 'C';
-const char TARGET = 'T';
-const char EXPLORED = 'E';
-const char BORDER = 'B';
-
-// +++ VARIABLES +++
-// field
-char MOVE_SPACE[MAP_DIM_X][MAP_DIM_Y];
-// current state of explorer
-Current_State current_state;
-// normal ground color
-int NORMAL_GROUND_COLOR = 0;
+#include "a_star_algorithm.h"
 
 
 // +++ TASK FLAGS ++
@@ -234,37 +191,16 @@ bool can_move(short direction) {
  *  and the robot will go to this position.
  */
 void move() {
-<<<<<<< HEAD
     drive(TILE_SIZE, 1);
     if (is_occupied()) {
         update_current_position(current_state.direction);
         MOVE_SPACE[current_state.pos_x][current_state.pos_y] = OCCUPIED;
         drive(TILE_SIZE, -1);
         update_current_position((current_state.direction + 2) % 4);
-=======
-    // Just move to next (4neighbor) empty field
-    if (canMove(CURRENT_DIRECTION)) {
-        drive(TILE_SIZE, 1);
-        if (isOccupied()) {
-            updateCurrentPosition(CURRENT_DIRECTION);
-            MOVE_SPACE[POS_X][POS_Y] = OCCUPIED;
-            drive(TILE_SIZE, -1);
-            updateCurrentPosition((CURRENT_DIRECTION + 2) % 4);
-            reorient();
-        } else {
-            MOVE_SPACE[POS_X][POS_Y] = EXPLORED;
-            updateCurrentPosition(CURRENT_DIRECTION);
-        }
     } else {
->>>>>>> remotes/origin/master
-        reorient();
-    } else {
-        MOVE_SPACE[current_state.pos_x][current_state.pos_y] = EXPLORED;
-        update_current_position(current_state.direction);
-    }
-
-    
-
+		update_current_position(current_state.direction);
+		MOVE_SPACE[current_state.pos_x][current_state.pos_y] = EXPLORED;
+	}
 }
 
 /*

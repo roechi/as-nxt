@@ -1,13 +1,11 @@
+#include "defines.h"
+
 #include "a_star_algorithm.h"
 
 #define A_STAR_SIZE_X 3
 #define A_STAR_SIZE_Y 3
 #define A_STAR_NEARBOURS 4
 
-#define TARGET 'T'
-#define EXPLORED 'E'
-
-char MOVE_SPACE[3][3];
 unsigned char a_star_last_id;
 
 #define A_STAR_LIST_SIZE 127
