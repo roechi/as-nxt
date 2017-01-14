@@ -1,19 +1,60 @@
-task main ()
-{
-    string in, out;
-    bool run = true;
-    int line = 0;
-    SendResponseBool(MAILBOX1, true);
-    while (run)
+#include "serialize.h"
+
+struct Map {
+       int x_dim;
+       int y_dim;
+       char data[][];
+};
+
+Map map;
+
+void resiveMap() {
+
+    int cs;
+
+    bool header_read = false;
+    bool read = true;
+    string data;
+    while (read)
     {
         NumOut(0, 40, BluetoothStatus(CONN_BT0));
         NumOut(0, 50, NO_ERR);
+        string in;
         if (ReceiveRemoteString(MAILBOX1, true, in) == NO_ERR)
         {
-            TextOut (0, line * 8, in, true);
+            TextOut (0, 0, in, true);
+            if (in == "FIN") {
+                  read = false;
+            }
+
+            if (header_read) {
+               data = StrCat(data, in);
+            }
+
+            if (SubStr(in, 0, 1) == "#" && !header_read) {
+              int x_dim;
+              int y_dim;
+              parseHeader(in, x_dim, y_dim, cs);
+              map.x_dim = x_dim;
+              map.y_dim = y_dim;
+              header_read = true;
+            }
+
             SendResponseBool(MAILBOX1, true);
             Wait(1000);
-            line = line + 1;
         }
     }
+    
+    deserialize(data, map.data);
+}
+
+
+task main ()
+{
+    string in, out;
+    bool read = true;
+    int line = 0;
+    SendResponseBool(MAILBOX1, true);
+    
+
 }
