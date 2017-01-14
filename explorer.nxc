@@ -234,17 +234,37 @@ bool can_move(short direction) {
  *  and the robot will go to this position.
  */
 void move() {
+<<<<<<< HEAD
     drive(TILE_SIZE, 1);
     if (is_occupied()) {
         update_current_position(current_state.direction);
         MOVE_SPACE[current_state.pos_x][current_state.pos_y] = OCCUPIED;
         drive(TILE_SIZE, -1);
         update_current_position((current_state.direction + 2) % 4);
+=======
+    // Just move to next (4neighbor) empty field
+    if (canMove(CURRENT_DIRECTION)) {
+        drive(TILE_SIZE, 1);
+        if (isOccupied()) {
+            updateCurrentPosition(CURRENT_DIRECTION);
+            MOVE_SPACE[POS_X][POS_Y] = OCCUPIED;
+            drive(TILE_SIZE, -1);
+            updateCurrentPosition((CURRENT_DIRECTION + 2) % 4);
+            reorient();
+        } else {
+            MOVE_SPACE[POS_X][POS_Y] = EXPLORED;
+            updateCurrentPosition(CURRENT_DIRECTION);
+        }
+    } else {
+>>>>>>> remotes/origin/master
         reorient();
     } else {
         MOVE_SPACE[current_state.pos_x][current_state.pos_y] = EXPLORED;
         update_current_position(current_state.direction);
     }
+
+    
+
 }
 
 /*

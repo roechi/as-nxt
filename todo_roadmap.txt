@@ -1,0 +1,15 @@
+- serializierung
+
+- bluetooth verbindung
+	- handshake??? - wahrscheinlich nicht nötig
+
+- formate
+
+- pathfinding (A*)
+
+- intelligente routenverfolgung (scout)
+	- start und endpunkt markieren
+
+- 
+
+- 
