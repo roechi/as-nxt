@@ -1,4 +1,4 @@
-void initMoveSpace(char &environment[][], short x_dim, short y_dim);
+void initMoveSpace();
 void doStuff(char &environment[][]);
 void see(char &environment[][], short &directions[], short length);
 bool isOccupied();

@@ -37,7 +37,7 @@ const short SOUTH = 2;
 const short WEST = 3;
 const short GOAL = 4;
 
-char MOVE_SPACE[MAP_DIMENSION][MAP_DIMENSION];
+char MOVE_SPACE[X_DIM][Y_DIM];
 
 short POS_X = 0;
 short POS_Y = 0;
@@ -52,11 +52,10 @@ bool EXPLORE = true;
 // +++ METHODS ++
 
 
-void initMoveSpace(char &environment[][], short x_dim, short y_dim) {
-    for (int x = 0; x < x_dim; x++) {
-        for (int y = 0; y < y_dim; y++) {
-            environment[x][y] = FREE;
-            //*(environment + y * x_dim + x) = FREE;
+void initMoveSpace() {
+    for (int x = 0; x < X_DIM; x++) {
+        for (int y = 0; y < Y_DIM; y++) {
+            MOVE_SPACE[x][y] = FREE;
         }
     }
 }
@@ -199,9 +198,8 @@ void rotateOnSpot(int direction, float wheelDistance, float wheelRadius, int ang
 }
 
 void moveForward(long speed) {
-
-
-    RotateMotorEx(BOTH_DRIVE, speed, 360, 100, false, true);
+//void RotateMotorEx(byte outputs,char pwr, long angle, char turnpct, bool sync, bool stop)   
+    RotateMotorEx(BOTH_DRIVE, speed, 360, 100, true, true);
     //OnFwd(BOTH_DRIVE, speed);
 }
 
