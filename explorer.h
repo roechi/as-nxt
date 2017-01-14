@@ -4,16 +4,16 @@ void init_current_state(char x, char y, char direction);
 void init_ground_detectors();
 
 void doStuff();
-void see();
+bool see();
 
 void update_current_position(char direction);
 void reorient();
 char get_field_in_direction(char direction);
 bool can_move(short direction);
-void move()
+void move();
 char find_new_direction();
-bool isOccupied();
-bool checkGround();
+bool is_occupied();
+bool check_ground();
 
 // Movement
 void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle);
