@@ -168,9 +168,9 @@ bool can_move(short direction) {
     bool result = true;
 
     if (
-            (pos_new_x > MAP_DIMENSION - 1) ||
+            (pos_new_x > MAP_DIM_X - 1) ||
             (pos_new_x < 0) ||
-            (pos_new_y > MAP_DIMENSION - 1) ||
+            (pos_new_y > MAP_DIM_Y - 1) ||
             (pos_new_y <0)
         ) {
         result = false;

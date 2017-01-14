@@ -330,7 +330,3 @@ void a_star_build_path(A_Star_Node a_star_target)
 		a_star_reversed_path[i].id = 0;
 	}
 }
-
-task main() 
-{
-}
