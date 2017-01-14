@@ -3,7 +3,7 @@ string serialize(char & in[][])
 	return FlattenVar(in);
 }
 
-void deserialize(string in, char & out[][])
+void deserialize(string in, char & out[])
 {
 	UnflattenVar(in, out);
 }
