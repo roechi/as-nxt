@@ -50,29 +50,48 @@ void init_ground_detectors() {
 
 void doStuff() {
 
-    // maybe use see method and dicide what to do...in move
-    bool current_state_move_possible = see();
-    if(current_state_move_possible) {
+    if(can_move(current_state.direction))   //move in current direction
+    {
         move();
-    } else {
+    }
+    else if(find_new_direction() != -1)     //reorient
+    {
         reorient();
     }
-}
-
-/*
- * Looks from current Position in current Direction and returns 
- * true if move is possible.
- */
-bool see()
-{
-    // look at my stuff, my stuff is amazing
-
-    bool is_move_with_current_state_possible = false;
-    if (can_move(current_state.direction)) {
-        is_move_with_current_state_possible = true;
+    else                                    //go back
+    {
+        //TMP TODO: no clean solution
+        Position current = stack.pop();
+        Position target = stack.space[stack.last_element];
+        
+        A_Star_Position pos_start;
+        pos.x = current.x;
+        pos.y = current.y;
+        
+        A_Star_Position pos_target;
+        pos_target.x = target.x;
+        pos_target.y = target.y;
+        
+        a_star_calculate_path(pos_start, pos_target);
+        
+        //move to point?!
     }
-    return is_move_with_current_state_possible;
 }
+
+// /*
+//  * Looks from current Position in current Direction and returns 
+//  * true if move is possible.
+//  */
+// bool see()
+// {
+//     // look at my stuff, my stuff is amazing
+
+//     bool is_move_with_current_state_possible = false;
+//     if (can_move(current_state.direction)) {
+//         is_move_with_current_state_possible = true;
+//     }
+//     return is_move_with_current_state_possible;
+// }
 
 /*
  *  Updates the current Position (int current_state) 
@@ -101,24 +120,6 @@ void update_current_position(char direction) {
  */
 void reorient() {
     char new_direction = find_new_direction(); //-1 is possible
-    //TMP TODO: no clean solution
-    if(new_direction == -1)
-	{
-		Position current = stack.pop();
-		Position target = stack.space[stack.last_element];
-		
-		A_Star_Position pos_start;
-		pos.x = current.x;
-		pos.y = current.y;
-		
-		A_Star_Position pos_target;
-		pos_target.x = target.x;
-		pos_target.y = target.y;
-		
-		a_star_calculate_path(pos_start, pos_target);
-		
-        return;
-	}
 
     while (new_direction != current_state.direction) {
         if (new_direction > current_state.direction) {
