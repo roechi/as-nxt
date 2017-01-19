@@ -8,9 +8,12 @@ A_Star_Node a_star_open_list[LIST_SIZE];
 A_Star_Node a_star_closed_list[LIST_SIZE];
 A_Star_Node a_star_reversed_path[LIST_SIZE];
 
+unsigned char a_star_start_at;
+
 
 void a_star_calculate_path(A_Star_Position a_star_start, A_Star_Position a_star_target)
 {
+	a_star_start_at = 0;
 	a_star_last_id = 1;
 
 	A_Star_Node start_node;
@@ -319,6 +322,8 @@ void a_star_build_path(A_Star_Node a_star_target)
 		current_node = a_star_get_closed_list_index_by_id(current_node.previous_node);
 		a_star_reversed_path[index++] = current_node;
 	}
+	
+	a_star_start_at = index - 1;
 	
 	for (unsigned char i = index; i < LIST_SIZE; ++i)
 	{
