@@ -13,6 +13,7 @@ Map map;
 void receiveMap() {
 
     int cs;
+    int RECEIVING_MAILBOX = MAILBOX1;
 
     bool header_read = false;
     bool read = true;
@@ -22,7 +23,7 @@ void receiveMap() {
         NumOut(0, 40, BluetoothStatus(CONN_BT0));
         NumOut(0, 50, NO_ERR);
         string in;
-        if (ReceiveRemoteString(MAILBOX1, true, in) == NO_ERR)
+        if (ReceiveRemoteString(RECEIVING_MAILBOX, true, in) == NO_ERR)
         {
             TextOut (0, 0, in);
             if (in == "FIN") {
@@ -51,7 +52,7 @@ void receiveMap() {
               header_read = true;
             }
 
-            SendResponseBool(MAILBOX1, true);
+            SendResponseBool(RECEIVING_MAILBOX, true);
             Wait(1000);
         }
     }

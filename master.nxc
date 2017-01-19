@@ -1,39 +1,35 @@
 #include "serialize.h"
 
+const int CHUNK_SIZE = 25;
+const int RECEIVING_MAILBOX = MAILBOX1;
+
 const int X_DIM = 8;
 const int Y_DIM = 8;
-const int CHUNK_SIZE = 25;
     
-void initMoveSpace(char & in[][], int x_dim, int y_dim);
-
-void BTWait (){
-    bool temp = false; 
-    until(ReceiveRemoteBool(MAILBOX1, true, temp) == NO_ERR);
-}
-
-void BTFlush (int connection){
-    byte temp; 
-    while(ReceiveMessage(MAILBOX1, true, temp) == NO_ERR);
-}
+void initMap(char & in[][], int x_dim, int y_dim);
+void sendMap(char & map[][], int x_dim, int y_dim);
+void BTWait();
 
 task main()
 {
-    NumOut(0, 40, BluetoothStatus(CONN_BT1));
-    NumOut(0, 50, NO_ERR);
+    TextOut(0, LCD_LINE1, StrCat("BT Status: ", NumToStr(BluetoothStatus(CONN_BT1))));
+    NumOut(0, LCD_LINE2, NO_ERR);
     
     BTWait();
-
     TextOut(0, 0, "begin");
 
     char foo[X_DIM][Y_DIM];
-    
-    initMoveSpace(foo, X_DIM, Y_DIM);
+    initMap(foo, X_DIM, Y_DIM);
 
-    string msg = serialize(foo);
-    int last_chunk = SizeOf(foo) % CHUNK_SIZE;
-    int num_of_chunks = (SizeOf(foo) - last_chunk) / CHUNK_SIZE;  
+    sendMap(foo, X_DIM, Y_DIM);
+}
 
-    string header = createHeader(X_DIM, Y_DIM, CHUNK_SIZE);
+void sendMap(char & map[][], int x_dim, int y_dim) {
+    string msg = serialize(map);
+    int last_chunk = SizeOf(map) % CHUNK_SIZE;
+    int num_of_chunks = (SizeOf(map) - last_chunk) / CHUNK_SIZE;  
+
+    string header = createHeader(x_dim, y_dim, CHUNK_SIZE);
     SendRemoteString(1, 0, header);
     BTWait();
 
@@ -44,19 +40,24 @@ task main()
 
         BTWait();
     }
-    string chunk = SubStr(msg, num_of_chunks * CHUNK_SIZE, SizeOf(foo));
+    string chunk = SubStr(msg, num_of_chunks * CHUNK_SIZE, SizeOf(map));
     SendRemoteString(1, 0, chunk);
     BTWait();
     
     string fin = createFinMessage();
     SendRemoteString(1, 0, fin);
     BTWait();    
-}
+} 
 
-void initMoveSpace(char & in[][], int x_dim, int y_dim) {
+void initMap(char & in[][], int x_dim, int y_dim) {
     for (int x = 0; x < x_dim; x++) {
         for (int y = 0; y < y_dim; y++) {
             in[x][y] = 'O';
         }
     }
+}
+
+void BTWait (){
+    bool temp = false; 
+    until(ReceiveRemoteBool(RECEIVING_MAILBOX, true, temp) == NO_ERR);
 }
