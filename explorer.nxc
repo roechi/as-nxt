@@ -1,8 +1,15 @@
 #include "defines.h"
 
-#include "explorer.h"
-#include "a_star_algorithm.h"
+#include "stack.h"
 
+
+//#include "a_star_algorithm.h"
+
+
+#include "explorer.h"
+
+
+//Stack stack;
 
 // +++ TASK FLAGS ++
 bool EXPLORE = true;
@@ -21,6 +28,19 @@ void init_MoveSpace() {
     }
 }
 
+bool is_MoveSpace_explored()
+{
+	bool is_explored = true;
+    for (int x = 0; x < MAP_DIM_X && is_explored; x++) {
+        for (int y = 0; y < MAP_DIM_Y && is_explored; y++) {
+            if (MOVE_SPACE[x][y] == FREE)
+				is_explored = false;
+        }
+    }
+	
+	return is_explored;
+}
+
 /*
  *  Initializes current_state to given x, y and direction.
  *  If the given values are not valid, defaults are used.
@@ -37,6 +57,8 @@ void init_current_state(char x, char y, char direction) {
 	tmp.x = current_state.pos_x;
 	tmp.y = current_state.pos_y;
 	
+	MOVE_SPACE[current_state.pos_x][current_state.pos_y] = EXPLORED;
+		
 	stack_push(tmp);
 }
 
@@ -50,6 +72,11 @@ void init_ground_detectors() {
 // +++ Explorer logic +++
 
 void doStuff() {
+	if (stack_length() == 0 || is_MoveSpace_explored())
+	{
+		EXPLORE = false;
+		return;
+	}		
 
     if(can_move(current_state.direction))   //move in current direction
     {
@@ -61,12 +88,23 @@ void doStuff() {
     }
     else                                    //go back
     {
+		ClearScreen();
+		TextOut(0, LCD_LINE1, "Vor Pop");
+		Wait(2000);
+	
+		ClearScreen();
         //TMP TODO: no clean solution
         Position current = stack_pop();
-        Position target = stack.space[stack.last_element];
-        
+		TextOut(0, LCD_LINE1, "Pop Ok:");
+		
+		
+        Position target = get_top();
+        TextOut(0, LCD_LINE2, "Get Last Element Ok");
+		
         //move to target
         move_to_target(current, target);
+		TextOut(0, LCD_LINE3, "After Move To");
+		Wait(1000);
     }
 }
 
@@ -77,21 +115,55 @@ void doStuff() {
  */
 void move_to_target(Position current, Position target)
 {
+	Wait(1000);
+	ClearScreen();
+	TextOut(0, LCD_LINE1, "Pos: ");
+	
+	Position p = get_top();
+	
+	NumOut(30, LCD_LINE1, p.x);
+	NumOut(40, LCD_LINE1, p.y);
+	
+	
+	char d = current_state.direction;
+	
+	switch (d)
+	{
+		case NORTH:
+			TextOut(0, LCD_LINE2, "Norden");
+			break;
+		case EAST:
+			TextOut(0, LCD_LINE2, "Osten");
+			break;
+		case SOUTH:
+			TextOut(0, LCD_LINE2, "Sueden");
+			break;
+		case WEST:
+			TextOut(0, LCD_LINE2, "Westen");
+			break;
+		default:
+			TextOut(0, LCD_LINE2, "KP");
+	}
+	
     if(current.x > target.x)
     {
         turn_to_direction(current_state.direction, WEST);
+		TextOut(0, LCD_LINE3, "Nach Westen");
     }
     else if (current.x < target.x)
     {
         turn_to_direction(current_state.direction, EAST);
+		TextOut(0, LCD_LINE3, "Nach Osten");
     }
     else if (current.y > target.y)
     {
         turn_to_direction(current_state.direction, SOUTH);
+		TextOut(0, LCD_LINE3, "Nach Sueden");
     }
     else if(current.y < target.y)
     {
         turn_to_direction(current_state.direction, NORTH);
+		TextOut(0, LCD_LINE3, "Nach Norden");
     }
     else
     {
@@ -100,6 +172,8 @@ void move_to_target(Position current, Position target)
         return;
     }
 
+	Wait(2000);
+	
     drive(TILE_SIZE, MOVE_FORWARD);
     current_state.pos_x = target.x;
     current_state.pos_y = target.y;
@@ -111,7 +185,11 @@ void move_to_target(Position current, Position target)
  */
 void turn_to_direction(char current_direction, char target_direction)
 {
-    char offset = (target_direction + current_direction)  % 4;
+    char offset = (target_direction - current_direction);
+	
+	// Gilt wenn offset == 3 und macht offset = -1 => wechselt die Drehrichtung (auch fuer -3 => 1)
+	if (abs(offset) > 2)
+		offset = -(offset % 2);
 
     if(offset < 0)
     {
@@ -126,10 +204,6 @@ void turn_to_direction(char current_direction, char target_direction)
         {
             turnRight();
         } 
-    }
-    else
-    {
-        //do nothing cause your right :)
     }
     
     current_state.direction = target_direction;
@@ -178,15 +252,8 @@ void update_current_position(char direction) {
 void reorient() {
     char new_direction = find_new_direction(); //-1 is possible
 
-    while (new_direction != current_state.direction) {
-        if (new_direction > current_state.direction) {
-            turnRight();
-            current_state.direction = (current_state.direction + 1) % 4;
-        } else {
-            turnLeft();
-            current_state.direction = (current_state.direction - 1) % 4;
-        }
-    }
+	if (new_direction >= 0)
+		turn_to_direction(current_state.direction, new_direction);
 }
 
 /*
@@ -252,13 +319,13 @@ bool can_move(short direction) {
             (pos_new_x > MAP_DIM_X - 1) ||
             (pos_new_x < 0) ||
             (pos_new_y > MAP_DIM_Y - 1) ||
-            (pos_new_y <0)
+            (pos_new_y < 0)
         ) {
         result = false;
-    } else {    
-        if (MOVE_SPACE[pos_new_x][pos_new_y] == OCCUPIED) {
+    } else {
+        if (MOVE_SPACE[pos_new_x][pos_new_y] == OCCUPIED || MOVE_SPACE[pos_new_x][pos_new_y] == EXPLORED) {
             result = false;
-        } 
+        }
     }
 
     return result;
@@ -403,9 +470,23 @@ task explore() {
     Follows (main);
     //init movespace and position and direction of explorer-robot
     init_MoveSpace();
-    init_current_state(0,0,NORTH);
-
+    init_current_state(0, 0, NORTH);
+	
     while(EXPLORE) {
-        doStuff();
+        ClearScreen();
+		NumOut(50, LCD_LINE1, stack.last_element);
+		Wait(500);
+		
+		doStuff();
+		
+		
     }
+	
+	ClearScreen();
+	TextOut(0, LCD_LINE1, "Fertig");
+	Wait(2000);
+	
+	// Senden
+	
+	StopAllTasks();
 }
