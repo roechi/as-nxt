@@ -2,7 +2,6 @@
 
 #include "explorer.h"
 #include "a_star_algorithm.h"
-#include "stack.h"
 
 
 // +++ TASK FLAGS ++
@@ -31,12 +30,14 @@ void init_current_state(char x, char y, char direction) {
     current_state.pos_y = (y < MAP_DIM_Y) ? y : 0;
     current_state.direction = (direction >= NORTH && direction <= WEST) ? direction : NORTH;
 
+	stack_init();
+	
 	// Add start position to stack
 	Position tmp;
 	tmp.x = current_state.pos_x;
 	tmp.y = current_state.pos_y;
 	
-	stack.push(tmp);
+	stack_push(tmp);
 }
 
 void init_ground_detectors() {
@@ -61,7 +62,7 @@ void doStuff() {
     else                                    //go back
     {
         //TMP TODO: no clean solution
-        Position current = stack.pop();
+        Position current = stack_pop();
         Position target = stack.space[stack.last_element];
         
         //move to target
@@ -285,7 +286,7 @@ void move() {
 		tmp.x = current_state.pos_x;
 		tmp.y = current_state.pos_y;
 		
-		stack.push(tmp);		
+		stack_push(tmp);
 	}
 }
 

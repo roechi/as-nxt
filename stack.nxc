@@ -1,5 +1,7 @@
 #include "stack.h"
 
+Stack stack;
+
 void stack_init()
 {
 	stack.last_element = 0;

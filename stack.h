@@ -10,8 +10,6 @@ struct Stack
 	Position space[LIST_SIZE];
 };
 
-Stack stack;
-
 void stack_init();
 void stack_push(Position element);
 Position stack_pop();

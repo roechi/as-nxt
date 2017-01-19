@@ -1,3 +1,5 @@
+#include "stack.h"
+
 // Initialization
 void init_MoveSpace();
 void init_current_state(char x, char y, char direction);
