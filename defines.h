@@ -19,6 +19,8 @@
 #define WHEEL_RADIUS 2.8
 #define WHEEL_DISTANCE 14
 #define TILE_SIZE 30
+#define MOVE_FORWARD 1
+#define MOVE_BACKWARD -1
 
 // +++ NAVIGATION +++
 // Dimensions
