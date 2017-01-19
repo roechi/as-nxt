@@ -1,0 +1,183 @@
+#include "serialize.h"
+
+void drawMap();
+
+int MAP_LEFT_OFFSET = 50;
+int MAP_LEFT_BOTTOM = 35;
+
+struct Map {
+       int x_dim;
+       int y_dim;
+       char data[][];
+};
+
+struct Location {
+    int x;
+    int y;
+};
+
+enum Direction { UP = 1, RIGHT = 2, DOWN = 3, LEFT = 4 };
+
+Map map;
+Location location;
+Location nextTarget;
+Direction direction;
+int round = 0;
+
+void initTestMap() {
+    byte m[MAP_DIMATION][MAP_DIMATION] = {
+{0,1,1,1,1,1,1,1,1,1},
+{1,0,1,1,1,1,1,1,1,1},
+{1,1,0,1,1,1,1,1,1,1},
+{1,1,1,0,1,1,1,1,1,1},
+{1,1,1,1,0,1,1,1,1,1},
+{1,1,1,1,1,0,1,1,1,1},
+{1,1,1,1,1,1,0,1,1,1},
+{1,1,1,1,1,1,1,0,1,1},
+{1,1,1,1,1,1,1,1,0,1},
+{1,1,1,1,1,1,1,1,1,0}
+};
+map.data = m;
+map.x_dim = 10;
+map.y_dim = 10;
+}
+
+void receiveMap() {
+
+    int cs;
+    int RECEIVING_MAILBOX = MAILBOX1;
+
+    bool header_read = false;
+    bool read = true;
+    string data = "";
+    while (read)
+    {
+        NumOut(0, 40, BluetoothStatus(CONN_BT0));
+        NumOut(0, 50, NO_ERR);
+        string in;
+        if (ReceiveRemoteString(RECEIVING_MAILBOX, true, in) == NO_ERR)
+        {
+            TextOut (0, 0, in);
+            if (in == "FIN") {
+                  read = false;
+            }
+
+            if (header_read && read) {
+                string temp = StrCat(data, in);
+                data = temp;
+            }
+
+            if (SubStr(in, 0, 1) == "#" && !header_read) {
+              int x_dim;
+              int y_dim;
+              parseHeader(in, x_dim, y_dim, cs);
+
+              
+
+              map.x_dim = x_dim;
+              map.y_dim = y_dim;
+
+              char m[map.x_dim][map.y_dim];
+              
+              
+              map.data = m;
+              header_read = true;
+            }
+
+            SendResponseBool(RECEIVING_MAILBOX, true);
+            Wait(1000);
+        }
+    }
+    NumOut(0, 30, 0);
+    Wait(1000);
+    deserialize(data, map.x_dim, map.y_dim, map.data);
+    ClearScreen();
+    drawMap();
+    Wait(10000);
+}
+
+void drawMapOuterBorder() {
+    for (int i = 0; i < map.x_dim + 2; i++) {
+        PointOut(i + MAP_LEFT_OFFSET - 1, 0 + MAP_LEFT_BOTTOM - 1);
+        PointOut(i + MAP_LEFT_OFFSET - 1, map.x_dim + 1 + MAP_LEFT_BOTTOM - 1);
+        PointOut(MAP_LEFT_OFFSET - 1, i + MAP_LEFT_BOTTOM - 1);
+        PointOut(MAP_LEFT_OFFSET - 1 + map.x_dim + 1, i + MAP_LEFT_BOTTOM - 1);
+    }
+}
+
+void drawMap() {
+     for (int i = 0; i < map.x_dim; i++) {
+         for (int j = 0; j < map.y_dim; j++) {
+            if (map.data[i][j]) {
+                PointOut(i + MAP_LEFT_OFFSET, j + MAP_LEFT_BOTTOM);
+            }
+         }
+     }
+}
+
+void drawStats() {
+     TextOut(0, LCD_LINE1, "loc x:");
+     NumOut(35, LCD_LINE1, location.x);
+     TextOut(0, LCD_LINE2, "loc y:");
+     NumOut(35, LCD_LINE2, location.y);
+     TextOut(0, LCD_LINE3, "tar x:");
+     NumOut(35, LCD_LINE3, nextTarget.x);
+     TextOut(0, LCD_LINE4, "tar y:");
+     NumOut(35, LCD_LINE4, nextTarget.y);
+     TextOut(0, LCD_LINE5, "direc:");
+     NumOut(35, LCD_LINE5, direction);
+     TextOut(0, LCD_LINE6, "round:");
+     NumOut(35, LCD_LINE6, round);
+}
+
+void draw() {
+     drawMapOuterBorder();
+     drawMap();
+     drawStats();
+}
+
+void init() {
+     location.x = 0;
+     location.y = 0;
+     nextTarget.x = 0;
+     nextTarget.y = 0;
+     direction = UP;
+     initTestMap();
+}
+
+void findNextTarget() {
+
+}
+
+void goToNextTarget() {
+
+}
+
+bool checkForDone() {
+    return false;
+}
+
+
+void goToTarget() {
+     bool go = true;
+     while(go) {
+          draw();
+          findNextTarget();
+          goToNextTarget();
+          go = checkForDone();
+          round = round + 1;
+     }
+}
+
+task main ()
+{
+    init();
+    string in, out;
+    bool read = true;
+    int line = 0;
+    SendResponseBool(MAILBOX1, true);
+    receiveMap();
+    goToTarget();
+
+    Wait(10000);
+}
