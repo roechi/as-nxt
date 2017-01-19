@@ -10,7 +10,7 @@ struct Map {
 
 Map map;
 
-void resiveMap() {
+void receiveMap() {
 
     int cs;
 
@@ -78,6 +78,6 @@ task main ()
     bool read = true;
     int line = 0;
     SendResponseBool(MAILBOX1, true);
-    resiveMap();
+    receiveMap();
     TextOut (0, 0, "done", true);
 }
