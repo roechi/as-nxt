@@ -4,7 +4,10 @@ void init_current_state(char x, char y, char direction);
 void init_ground_detectors();
 
 void doStuff();
-bool see();
+// bool see();
+
+void move_to_target(Position current, Position target);
+void turn_to_direction(char current_direction, char target_direction);
 
 void update_current_position(char direction);
 void reorient();
