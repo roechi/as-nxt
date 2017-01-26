@@ -454,7 +454,7 @@ void drive(int distance, int direction)
 }
 
 
-void verpiss_dich_from_se_gelaende()
+void drive_away()
 {
     //Drive
     OnFwd(BOTH_DRIVE, 100);
@@ -499,7 +499,7 @@ task explore() {
 
 	// Senden
 
-    verpiss_dich_from_se_gelaende();
+    drive_away();
 	
 	StopAllTasks();
 }

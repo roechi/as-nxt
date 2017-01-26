@@ -31,4 +31,4 @@ void turnAround();
 void drive(int distance, int direction);
 
 
-void verpiss_dich_from_se_gelaende();
+void drive_away();
