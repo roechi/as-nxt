@@ -13,7 +13,7 @@ void turnLeft();
 void turnAround();
 void drive(int distance, int direction);
 
-void move_to_target(Position current, Position target);
+//void move_to_target(Position current, Position target);
 void turn_to_direction(char current_direction, char target_direction);
 
 void update_current_position(char direction);

@@ -1,35 +1,59 @@
+#include "defines.h"
 #include "serialize.h"
 #include "map_drawing.h"
+#include "a_star_algorithm.h"
+#include "stack.h"
 
-struct Location {
-    int x;
-    int y;
-};
-
-enum Direction { UP = 1, RIGHT = 2, DOWN = 3, LEFT = 4 };
+#include "current_state.h"
+#include "movement.h"
 
 Map map;
-Location location;
-Location nextTarget;
-Direction direction;
 int round = 0;
 
+
 void initTestMap() {
-    byte m[MAP_DIMATION][MAP_DIMATION] = {
-{0,1,1,1,1,1,1,1,1,1},
-{1,0,1,1,1,1,1,1,1,1},
-{1,1,0,1,1,1,1,1,1,1},
-{1,1,1,0,1,1,1,1,1,1},
-{1,1,1,1,0,1,1,1,1,1},
-{1,1,1,1,1,0,1,1,1,1},
-{1,1,1,1,1,1,0,1,1,1},
-{1,1,1,1,1,1,1,0,1,1},
-{1,1,1,1,1,1,1,1,0,1},
-{1,1,1,1,1,1,1,1,1,0}
-};
-map.data = m;
-map.x_dim = 10;
-map.y_dim = 10;
+    //     char m[MAP_DIMATION][MAP_DIMATION] = {
+    // {'C','C','C','C','C','C','C','C','C','T'},
+    // {'C','C','C','C','C','C','C','C','C','C'},
+    // {'C','C','C','C','C','C','C','C','C','C'},
+    // {'C','C','C','C','C','C','C','C','C','C'},
+    // {'C','C','C','C','C','C','C','C','C','C'},
+    // {'C','C','C','C','C','C','C','C','C','C'},
+    // {'C','C','C','C','C','C','C','C','C','C'},
+    // {'C','C','C','C','C','C','C','C','C','C'},
+    // {'C','C','C','C','C','C','C','C','C','C'},
+    // {'C','C','C','C','C','C','C','C','C','C'}
+    // };
+
+
+    //    char m[MAP_DIMATION][MAP_DIMATION] = {
+    // {'C','C','C','C','C','C','C','C','C','T'},
+    // {'C','C','C','C','C','C','C','E','E','E'},
+    // {'C','C','C','C','C','C','C','E','C','C'},
+    // {'C','C','C','C','C','E','E','E','C','C'},
+    // {'C','C','C','C','C','E','C','C','C','C'},
+    // {'C','C','C','E','E','E','C','C','C','C'},
+    // {'C','C','C','E','C','C','C','C','C','C'},
+    // {'C','E','E','E','C','C','C','C','C','C'},
+    // {'C','E','C','C','C','C','C','C','C','C'},
+    // {'E','E','C','C','C','C','C','C','C','C'}
+    // };
+
+
+       char m[MAP_DIMATION][MAP_DIMATION] = {
+    {'E','C','C','C','C','C','C','C','C','T'},
+    {'E','C','C','C','C','E','E','E','C','E'},
+    {'E','C','C','C','C','E','C','E','C','E'},
+    {'E','C','C','C','C','E','C','E','E','E'},
+    {'E','E','E','E','C','E','C','C','C','E'},
+    {'E','C','C','E','C','E','C','C','C','E'},
+    {'E','C','C','E','C','E','C','C','C','E'},
+    {'E','C','C','E','E','E','C','C','C','E'},
+    {'E','C','C','C','C','C','C','C','C','E'},
+    {'E','C','C','C','C','C','C','C','C','E'}
+    };
+
+MOVE_SPACE = m;
 }
 
 void receiveMap() {
@@ -64,13 +88,13 @@ void receiveMap() {
 
               
 
-              map.x_dim = x_dim;
-              map.y_dim = y_dim;
+              //map.x_dim = x_dim;
+              //map.y_dim = y_dim;
 
-              char m[map.x_dim][map.y_dim];
+              //char m[map.x_dim][map.y_dim];
               
               
-              map.data = m;
+              //map.data = m;
               header_read = true;
             }
 
@@ -80,60 +104,88 @@ void receiveMap() {
     }
     NumOut(0, 30, 0);
     Wait(1000);
-    deserialize(data, map.x_dim, map.y_dim, map.data);
+    deserialize(data, MAP_DIM_X, MAP_DIM_Y, MOVE_SPACE);
     ClearScreen();
-    drawMap(map);
+    drawMap(MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
     Wait(10000);
 }
 
-void drawStats() {
+void drawStats(Position t) {
      TextOut(0, LCD_LINE1, "loc x:");
-     NumOut(35, LCD_LINE1, location.x);
+     NumOut(35, LCD_LINE1, current_state.pos_y);
      TextOut(0, LCD_LINE2, "loc y:");
-     NumOut(35, LCD_LINE2, location.y);
+     NumOut(35, LCD_LINE2, current_state.pos_y);
      TextOut(0, LCD_LINE3, "tar x:");
-     NumOut(35, LCD_LINE3, nextTarget.x);
+     NumOut(35, LCD_LINE3, t.x);
      TextOut(0, LCD_LINE4, "tar y:");
-     NumOut(35, LCD_LINE4, nextTarget.y);
+     NumOut(35, LCD_LINE4, t.y);
      TextOut(0, LCD_LINE5, "direc:");
-     NumOut(35, LCD_LINE5, direction);
+     NumOut(35, LCD_LINE5, current_state.direction);
      TextOut(0, LCD_LINE6, "round:");
      NumOut(35, LCD_LINE6, round);
 }
 
-void draw() {
-     drawMap(map);
-     drawStats();
+void draw(Position t) {
+     ClearScreen();
+     drawMap(MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
+     drawStats(t);
 }
 
 void init() {
-     location.x = 0;
-     location.y = 0;
-     nextTarget.x = 0;
-     nextTarget.y = 0;
-     direction = UP;
+     current_state.pos_x = 0;
+     current_state.pos_y = 0;
+     current_state.direction = NORTH;
      initTestMap();
-}
-
-void findNextTarget() {
 
 }
 
-void goToNextTarget() {
-
+A_Star_Position find_target_position() {
+    A_Star_Position target;
+    for (int i = 0; i < MAP_DIM_X; i++) {
+         for (int j = 0; j < MAP_DIM_Y; j++) {
+            if (MOVE_SPACE[i][j] == TARGET) {
+                target.x = i;
+                target.y = j;
+                i = MAP_DIM_X;
+                j = MAP_DIM_Y;
+            }
+         }
+     }
+     return target;
 }
 
 bool checkForDone() {
-    return false;
+    bool done = false;
+    if (map.data[current_state.pos_x][current_state.pos_y] == TARGET &&
+        a_star_start_at == 0) {
+        done = true;
+    }
+    return done;
 }
 
-
 void goToTarget() {
+     A_Star_Position startPos;
+     startPos.x = 0;
+     startPos.y = 0;
+     A_Star_Position target = find_target_position();
+     a_star_calculate_path(startPos, target);
+
      bool go = true;
      while(go) {
-          draw();
-          findNextTarget();
-          goToNextTarget();
+          A_Star_Node node = a_star_reversed_path[a_star_start_at--];
+          Position t; 
+          t.x = node.pos.x;
+          t.y = node.pos.y;
+
+          Position p; 
+          p.x = current_state.pos_x;
+          p.y = current_state.pos_y;
+          
+          draw(t);
+          move_to_target(p,t);
+
+          MOVE_SPACE[t.x][t.y] = '0';          
+
           go = checkForDone();
           round = round + 1;
      }

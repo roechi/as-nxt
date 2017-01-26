@@ -8,31 +8,20 @@ struct Map {
        char data[][];
 };
 
-void drawMapOuterBorder(Map map) {
-    for (int i = 0; i < map.x_dim + 2; i++) {
+void drawMapOuterBorder(char MOVE_SPACE[][], char MAP_DIM_X, char MAP_DIM_Y) {
+    for (int i = 0; i < MAP_DIM_X + 2; i++) {
         PointOut(i + MAP_LEFT_OFFSET - 1, 0 + MAP_LEFT_BOTTOM - 1);
-        PointOut(i + MAP_LEFT_OFFSET - 1, map.x_dim + 1 + MAP_LEFT_BOTTOM - 1);
+        PointOut(i + MAP_LEFT_OFFSET - 1, MAP_DIM_X + 1 + MAP_LEFT_BOTTOM - 1);
         PointOut(MAP_LEFT_OFFSET - 1, i + MAP_LEFT_BOTTOM - 1);
-        PointOut(MAP_LEFT_OFFSET - 1 + map.x_dim + 1, i + MAP_LEFT_BOTTOM - 1);
+        PointOut(MAP_LEFT_OFFSET - 1 + MAP_DIM_X+ 1, i + MAP_LEFT_BOTTOM - 1);
     }
 }
 
-void drawMap(Map map) {
-     drawMapOuterBorder(map);
-     for (int i = 0; i < map.x_dim; i++) {
-         for (int j = 0; j < map.y_dim; j++) {
-            if (map.data[i][j]) {
-                PointOut(i + MAP_LEFT_OFFSET, j + MAP_LEFT_BOTTOM);
-            }
-         }
-     }
-}
-
-void drawMapMoveSpace(Map map) {
-     drawMapOuterBorder(map);
-     for (int i = 0; i < map.x_dim; i++) {
-         for (int j = 0; j < map.y_dim; j++) {
-            if (map.data[i][j] != 'F' || map.data[i][j] != 'E') {
+void drawMap(char MOVE_SPACE[][], char MAP_DIM_X, char MAP_DIM_Y) {
+     drawMapOuterBorder(MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
+     for (int i = 0; i < MAP_DIM_X; i++) {
+         for (int j = 0; j < MAP_DIM_Y; j++) {
+            if (MOVE_SPACE[i][j] == 'E') {
                 PointOut(i + MAP_LEFT_OFFSET, j + MAP_LEFT_BOTTOM);
             }
          }

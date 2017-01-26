@@ -23,9 +23,9 @@
 
 // +++ NAVIGATION +++
 // Dimensions
-const char MAP_DIMENSION = 3;
-const char MAP_DIM_X = 3;
-const char MAP_DIM_Y = 3;
+const char MAP_DIMENSION = 10;
+const char MAP_DIM_X = 10;
+const char MAP_DIM_Y = 10;
 // Directions
 const char NORTH = 0;
 const char EAST = 1;
