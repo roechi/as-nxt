@@ -18,17 +18,17 @@ char find_new_direction();
 bool is_occupied();
 bool check_ground();
 
-// Movement
-void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle);
-void moveForward(char speed);
-void moveBackward(char speed);
-void backOff();
-void stopMove();
-void rotate90(char direction);
-void turnRight();
-void turnLeft();
-void turnAround();
-void drive(int distance, int direction);
+// // Movement
+// void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle);
+// void moveForward(char speed);
+// void moveBackward(char speed);
+// void backOff();
+// void stopMove();
+// void rotate90(char direction);
+// void turnRight();
+// void turnLeft();
+// void turnAround();
+// void drive(int distance, int direction);
 
 
 void drive_away();

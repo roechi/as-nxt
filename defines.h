@@ -1,4 +1,3 @@
-#include "current_state.h"
 
 // +++ ROBOT CONSTANTS ***
 #define RIGHT OUT_C
@@ -7,7 +6,7 @@
 #define NECK OUT_A
 #define GROUND_DETECTOR_L IN_2
 #define GROUND_DETECTOR_R IN_3
-#define SENSOR_TOUCH IN_1
+#define TOUCH_SENSOR IN_1
 #define ULTRA IN_4
 #define DIRECTION_RIGHT 1
 #define DIRECTION_LEFT -1
@@ -42,8 +41,6 @@ const char BORDER = 'B';
 // +++ VARIABLES +++
 // field
 char MOVE_SPACE[MAP_DIM_X][MAP_DIM_Y];
-// current state of explorer
-Current_State current_state;
 // normal ground color
 int NORMAL_GROUND_COLOR = 0;
 
