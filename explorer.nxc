@@ -297,6 +297,7 @@ bool check_ground() {
 
 task main() {
     init_ground_detectors();
+    PlaySound(SOUND_UP);
 }
 
 task explore() {
@@ -318,7 +319,7 @@ task explore() {
     drawMap(MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
 
 	// Senden
-
+    PlaySound(SOUND_DOWN);
     drive_away();
 }
 
@@ -330,14 +331,12 @@ task stopOnTouch()
     
     while (true)
     {
-        while(!Sensor(TOUCH_SENSOR))
+        if (Sensor(TOUCH_SENSOR))
         {
-            ;
+            Acquire(drive_motors);
+            stopMove();
+            Stop(true);
         }
-        
-        Acquire(drive_motors);
-
-        Stop(true);
     }
 }
 
