@@ -28,7 +28,7 @@ void update_current_position(char direction);
 void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle)
 {
     int wheelRotationAngle = angle * ((wheelDistance / 2) / wheelRadius);
-
+    
     RotateMotorEx(BOTH_DRIVE, ROTATION_SPEED, wheelRotationAngle, (-direction) * 100, true, true);
 }
 
@@ -72,14 +72,15 @@ void turnAround() {
 
 void drive(int distance, int direction)
 {
-    int wheelRotationAngle = 2 * PI * WHEEL_RADIUS * distance * direction;
+    int wheelRotationAngle = distance * 360 / (2 * WHEEL_RADIUS * PI);
 
-    RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, 0, true, true);
+    RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle * direction, 0, true, true);
 }
 
 
 void drive_away()
 {
+    turn_to_direction(current_state.direction, NORTH);
     //Drive
     OnFwd(BOTH_DRIVE, 100);
     //Stop if touchsensor calls collision
