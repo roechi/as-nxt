@@ -1,7 +1,7 @@
 #include "defines.h"
 #include "stack.h"
-#include "current_state.h"
-//#include "a_star_algorithm.h"
+// #include "current_state.h"
+// #include "a_star_algorithm.h"
 #include "explorer.h"
 #include "movement.h"
 #include "map_drawing.h"
@@ -10,6 +10,8 @@
 // +++ TASK FLAGS ++
 bool EXPLORE = true;
 
+// Define motor mutexes for synchronization
+mutex drive_motors;
 // +++ METHODS ++
 // +++ Initialization +++
 
@@ -85,23 +87,23 @@ void doStuff() {
     }
     else                                    //go back
     {
-		ClearScreen();
-		TextOut(0, LCD_LINE1, "Vor Pop");
-		Wait(2000);
+		// ClearScreen();
+		// TextOut(0, LCD_LINE1, "Vor Pop");
+		// Wait(2000);
 	
-		ClearScreen();
+		// ClearScreen();
         //TMP TODO: no clean solution
         Position current = stack_pop();
-		TextOut(0, LCD_LINE1, "Pop Ok:");
+		// TextOut(0, LCD_LINE1, "Pop Ok:");
 		
 		
         Position target = get_top();
-        TextOut(0, LCD_LINE2, "Get Last Element Ok");
+        // TextOut(0, LCD_LINE2, "Get Last Element Ok");
 		
         //move to target
         move_to_target(current, target);
-		TextOut(0, LCD_LINE3, "After Move To");
-		Wait(1000);
+		// TextOut(0, LCD_LINE3, "After Move To");
+		// Wait(1000);
     }
 }
 
@@ -503,7 +505,26 @@ task explore() {
 	// Senden
 
     drive_away();
-	
-	StopAllTasks();
+}
+
+
+task stopOnTouch() 
+{
+    Follows (main);
+    SetSensorTouch(SENS_TOUCH);
+    
+    while (true)
+    {
+        while(!Sensor(SENS_TOUCH))
+        {
+            ;
+        }
+        
+        Acquire(drive_motors);
+
+        stopMove();
+        StopAllTasks();
+       
+    }
 }
 
