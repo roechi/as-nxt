@@ -6,7 +6,7 @@ void init_ground_detectors();
 void doStuff();
 // bool see();
 
-void update_current_position(char direction);
+// void update_current_position(char direction);
 void reorient();
 char get_field_in_direction(char direction);
 bool can_move(short direction);

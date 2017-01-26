@@ -16,6 +16,8 @@ void drive(int distance, int direction);
 void move_to_target(Position current, Position target);
 void turn_to_direction(char current_direction, char target_direction);
 
+void update_current_position(char direction);
+
 
 /*
  *  Rotates the robot on his position.
@@ -185,4 +187,23 @@ void move_to_target(Position current, Position target)
     current_state.pos_x = target.x;
     current_state.pos_y = target.y;
 
+}
+
+
+/*
+ *  Updates the current Position (int current_state) 
+ *  with the given direction.
+ */
+void update_current_position(char direction) {
+    switch (direction) {
+        case NORTH: current_state.pos_y += 1;
+                    break;
+        case EAST:  current_state.pos_x += 1;
+                    break;
+        case SOUTH: current_state.pos_y += -1;
+                    break;
+        case WEST:  current_state.pos_x += -1;
+                    break;
+        default: ;
+    }
 }
