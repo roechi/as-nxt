@@ -29,7 +29,7 @@ void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int an
 {
     int wheelRotationAngle = angle * ((wheelDistance / 2) / wheelRadius);
 
-    RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, (-direction) * 100, true, true);
+    RotateMotorEx(BOTH_DRIVE, ROTATION_SPEED, wheelRotationAngle, (-direction) * 100, true, true);
 }
 
 

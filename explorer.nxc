@@ -62,10 +62,10 @@ void init_current_state(char x, char y, char direction) {
 }
 
 void init_ground_detectors() {
-    SetSensorLight(GROUND_DETECTOR_R);
-    SetSensorLight(GROUND_DETECTOR_L);
+    SetSensorColorFull(GROUND_DETECTOR_RGB);
+    SetSensorColorFull(GROUND_DETECTOR_LIGHT);
     
-    NORMAL_GROUND_COLOR = (Sensor(GROUND_DETECTOR_R) + Sensor(GROUND_DETECTOR_L)) / 2;
+    NORMAL_GROUND_COLOR = Sensor(GROUND_DETECTOR_RGB);
 }
 
 // +++ Explorer logic +++
@@ -390,15 +390,30 @@ bool is_occupied() {
     return check_ground();
 }
 
+/**
+*   Return an int value representing the color of the ground. 
+*   Returns color black if read operation resulted in an error.
+*/
+int get_ground_color() {
+    SetSensorColorFull(GROUND_DETECTOR_RGB);
+    ColorSensorReadType csr;
+    csr.Port = GROUND_DETECTOR_RGB;
+    SysColorSensorRead(csr);
+    if (csr.Result == NO_ERR) {
+        return csr.ColorValue;
+    } else {
+        return INPUT_BLACKCOLOR;                    
+    }
+}
+
 /*
  *  Checks if the current ground color differs from the init value.
  */
 bool check_ground() {
-    SetSensorLight(GROUND_DETECTOR_R);
-    SetSensorLight(GROUND_DETECTOR_L);
-
-    return !((abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_R)) < LIGHT_THRESHOLD) 
-            && (abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_L)) < LIGHT_THRESHOLD));
+    if (get_ground_color() != INPUT_WHITECOLOR) {
+        return false;
+    } 
+    return true;
 }
 
 // /*
