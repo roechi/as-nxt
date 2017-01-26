@@ -26,4 +26,5 @@ void drawMap(char MOVE_SPACE[][], char MAP_DIM_X, char MAP_DIM_Y) {
             }
          }
      }
+
 }
