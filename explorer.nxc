@@ -221,23 +221,23 @@ void doStuff() {
 //     return is_move_with_current_state_possible;
 // }
 
-/*
- *  Updates the current Position (int current_state) 
- *  with the given direction.
- */
-void update_current_position(char direction) {
-    switch (direction) {
-        case NORTH: current_state.pos_y += 1;
-                    break;
-        case EAST:  current_state.pos_x += 1;
-                    break;
-        case SOUTH: current_state.pos_y += -1;
-                    break;
-        case WEST:  current_state.pos_x += -1;
-                    break;
-        default: ;
-    }
-}
+// /*
+//  *  Updates the current Position (int current_state) 
+//  *  with the given direction.
+//  */
+// void update_current_position(char direction) {
+//     switch (direction) {
+//         case NORTH: current_state.pos_y += 1;
+//                     break;
+//         case EAST:  current_state.pos_x += 1;
+//                     break;
+//         case SOUTH: current_state.pos_y += -1;
+//                     break;
+//         case WEST:  current_state.pos_x += -1;
+//                     break;
+//         default: ;
+//     }
+// }
 
 /*
  *  Searches for new possible directions. If no new way is possible
