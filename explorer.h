@@ -6,9 +6,6 @@ void init_ground_detectors();
 void doStuff();
 // bool see();
 
-void move_to_target(Position current, Position target);
-void turn_to_direction(char current_direction, char target_direction);
-
 void update_current_position(char direction);
 void reorient();
 char get_field_in_direction(char direction);
@@ -29,6 +26,9 @@ bool check_ground();
 // void turnLeft();
 // void turnAround();
 // void drive(int distance, int direction);
+
+// void move_to_target(Position current, Position target);
+// void turn_to_direction(char current_direction, char target_direction);
 
 
 void drive_away();
