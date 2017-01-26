@@ -526,11 +526,11 @@ task explore() {
 task stopOnTouch() 
 {
     Follows (main);
-    SetSensorTouch(SENS_TOUCH);
+    SetSensorTouch(TOUCH_SENSOR);
     
     while (true)
     {
-        while(!Sensor(SENS_TOUCH))
+        while(!Sensor(TOUCH_SENSOR))
         {
             ;
         }
