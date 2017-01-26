@@ -2,6 +2,7 @@
 #include "stack.h"
 //#include "a_star_algorithm.h"
 #include "explorer.h"
+#include "map_drawing.h"
 
 
 // +++ TASK FLAGS ++
@@ -328,7 +329,7 @@ bool can_move(short direction) {
  *  Explorer-Robot moves in current direction.
  *  If the field is OCCUPIED, it will be marked (as OCCUPIED) in the MOVE_SPACE 
  *  and the the robot will go back. Reoriantation follows.
- *  If the field is FREE, the field will marked (as EXPLORED) in the MMOVE_SPACE
+ *  If the field is FREE, the field will marked (as EXPLORED) in the MOVE_SPACE
  *  and the robot will go to this position.
  */
 void move() {
@@ -478,7 +479,14 @@ task explore() {
 	ClearScreen();
 	TextOut(0, LCD_LINE1, "Fertig");
 	Wait(2000);
-	
+
+    //try to draw Map on Screen
+    Map map;
+    map.x_dim = MAP_DIM_X;
+    map.y_dim = MAP_DIM_Y;
+    map.data = MOVE_SPACE;
+    drawMapMoveSpace(map);
+
 	// Senden
 	
 	StopAllTasks();

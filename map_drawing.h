@@ -27,3 +27,14 @@ void drawMap(Map map) {
          }
      }
 }
+
+void drawMapMoveSpace(Map map) {
+     drawMapOuterBorder(map);
+     for (int i = 0; i < map.x_dim; i++) {
+         for (int j = 0; j < map.y_dim; j++) {
+            if (map.data[i][j] != 'F' || map.data[i][j] != 'E') {
+                PointOut(i + MAP_LEFT_OFFSET, j + MAP_LEFT_BOTTOM);
+            }
+         }
+     }
+}
