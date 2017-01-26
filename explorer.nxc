@@ -1,15 +1,8 @@
 #include "defines.h"
-
 #include "stack.h"
-
-
 //#include "a_star_algorithm.h"
-
-
 #include "explorer.h"
 
-
-//Stack stack;
 
 // +++ TASK FLAGS ++
 bool EXPLORE = true;
