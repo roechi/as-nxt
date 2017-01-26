@@ -454,6 +454,17 @@ void drive(int distance, int direction)
 }
 
 
+void verpiss_dich_from_se_gelaende()
+{
+    //Drive
+    OnFwd(BOTH_DRIVE, 100);
+    //Stop if touchsensor calls collision
+    while(!Sensor(SENSOR_TOUCH));
+    //Stop driving
+    OnFwd(BOTH_DRIVE, 0);
+}
+
+
 // +++ TASKS +++
 
 task main() {
@@ -467,19 +478,18 @@ task explore() {
     init_current_state(0, 0, NORTH);
 	
     while(EXPLORE) {
+        // Test Output
         ClearScreen();
 		NumOut(50, LCD_LINE1, stack.last_element);
 		Wait(500);
-		
+        		
+        //Method Explorer
 		doStuff();
-		
-		
     }
 	
 	ClearScreen();
 	TextOut(0, LCD_LINE1, "Fertig");
 	Wait(2000);
-
     //try to draw Map on Screen
     Map map;
     map.x_dim = MAP_DIM_X;
@@ -488,6 +498,9 @@ task explore() {
     drawMapMoveSpace(map);
 
 	// Senden
+
+    verpiss_dich_from_se_gelaende();
 	
 	StopAllTasks();
 }
+

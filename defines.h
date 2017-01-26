@@ -7,7 +7,7 @@
 #define NECK OUT_A
 #define GROUND_DETECTOR_L IN_2
 #define GROUND_DETECTOR_R IN_3
-#define TOUCH IN_1
+#define SENSOR_TOUCH IN_1
 #define ULTRA IN_4
 #define DIRECTION_RIGHT 1
 #define DIRECTION_LEFT -1
