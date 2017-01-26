@@ -126,14 +126,8 @@ void turn_to_direction(char current_direction, char target_direction)
 void move_to_target(Position current, Position target)
 {
 	Wait(1000);
-	ClearScreen();
-	TextOut(0, LCD_LINE1, "Pos: ");
 	
-	Position p = get_top();
-	
-	NumOut(30, LCD_LINE1, p.x);
-	NumOut(40, LCD_LINE1, p.y);
-	
+    Position p = get_top();	
 	
 	char d = current_state.direction;
 	

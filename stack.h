@@ -63,6 +63,9 @@ unsigned char stack_length()
 
 Position get_top()
 {
+	if (stack.last_element == 0) {
+		return stack.space[0];
+	}
 	return stack.space[stack.last_element - 1];
 }
 

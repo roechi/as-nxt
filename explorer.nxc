@@ -71,9 +71,12 @@ void init_ground_detectors() {
 // +++ Explorer logic +++
 
 void doStuff() {
+    TextOut(0, LCD_LINE3, "Stack length: " + NumToStr(stack_length()));
 	if (stack_length() == 0 || is_MoveSpace_explored())
 	{
 		EXPLORE = false;
+        TextOut(0, LCD_LINE3, "All explored");
+        Wait(1000);
 		return;
 	}		
 
@@ -302,10 +305,7 @@ task explore() {
     init_MoveSpace();
     init_current_state(0, 0, NORTH);
 	
-    while(EXPLORE) {
-        // Test Output
-		Wait(500);
-        		
+    while(EXPLORE) {        		
         //Method Explorer
 		doStuff();
     }
@@ -314,11 +314,8 @@ task explore() {
 	TextOut(0, LCD_LINE1, "Fertig");
 	Wait(2000);
     //try to draw Map on Screen
-    Map map;
-    map.x_dim = MAP_DIM_X;
-    map.y_dim = MAP_DIM_Y;
-    map.data = MOVE_SPACE;
-    drawMapMoveSpace(map);
+    
+    drawMap(MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
 
 	// Senden
 
@@ -340,9 +337,7 @@ task stopOnTouch()
         
         Acquire(drive_motors);
 
-        stopMove();
-        StopAllTasks();
-       
+        Stop(true);
     }
 }
 
