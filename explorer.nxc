@@ -1,7 +1,7 @@
 #include "defines.h"
 #include "stack.h"
-#include "current_state.h"
-//#include "a_star_algorithm.h"
+// #include "current_state.h"
+// #include "a_star_algorithm.h"
 #include "explorer.h"
 #include "movement.h"
 #include "map_drawing.h"
@@ -10,6 +10,8 @@
 // +++ TASK FLAGS ++
 bool EXPLORE = true;
 
+// Define motor mutexes for synchronization
+mutex drive_motors;
 // +++ METHODS ++
 // +++ Initialization +++
 
@@ -60,10 +62,10 @@ void init_current_state(char x, char y, char direction) {
 }
 
 void init_ground_detectors() {
-    SetSensorLight(GROUND_DETECTOR_R);
-    SetSensorLight(GROUND_DETECTOR_L);
+    SetSensorColorFull(GROUND_DETECTOR_RGB);
+    SetSensorColorFull(GROUND_DETECTOR_LIGHT);
     
-    NORMAL_GROUND_COLOR = (Sensor(GROUND_DETECTOR_R) + Sensor(GROUND_DETECTOR_L)) / 2;
+    NORMAL_GROUND_COLOR = Sensor(GROUND_DETECTOR_RGB);
 }
 
 // +++ Explorer logic +++
@@ -85,159 +87,25 @@ void doStuff() {
     }
     else                                    //go back
     {
-		ClearScreen();
-		TextOut(0, LCD_LINE1, "Vor Pop");
-		Wait(2000);
+		// ClearScreen();
+		// TextOut(0, LCD_LINE1, "Vor Pop");
+		// Wait(2000);
 	
-		ClearScreen();
+		// ClearScreen();
         //TMP TODO: no clean solution
         Position current = stack_pop();
-		TextOut(0, LCD_LINE1, "Pop Ok:");
+		// TextOut(0, LCD_LINE1, "Pop Ok:");
 		
 		
         Position target = get_top();
-        TextOut(0, LCD_LINE2, "Get Last Element Ok");
+        // TextOut(0, LCD_LINE2, "Get Last Element Ok");
 		
         //move to target
         move_to_target(current, target);
-		TextOut(0, LCD_LINE3, "After Move To");
-		Wait(1000);
+		// TextOut(0, LCD_LINE3, "After Move To");
+		// Wait(1000);
     }
 }
-
-// //current and target a in neighborhood
-// /*
-//  * move robot to target. current and target should be
-//  * neighbours! updates current state
-//  */
-// void move_to_target(Position current, Position target)
-// {
-// 	Wait(1000);
-// 	ClearScreen();
-// 	TextOut(0, LCD_LINE1, "Pos: ");
-	
-// 	Position p = get_top();
-	
-// 	NumOut(30, LCD_LINE1, p.x);
-// 	NumOut(40, LCD_LINE1, p.y);
-	
-	
-// 	char d = current_state.direction;
-	
-// 	switch (d)
-// 	{
-// 		case NORTH:
-// 			TextOut(0, LCD_LINE2, "Norden");
-// 			break;
-// 		case EAST:
-// 			TextOut(0, LCD_LINE2, "Osten");
-// 			break;
-// 		case SOUTH:
-// 			TextOut(0, LCD_LINE2, "Sueden");
-// 			break;
-// 		case WEST:
-// 			TextOut(0, LCD_LINE2, "Westen");
-// 			break;
-// 		default:
-// 			TextOut(0, LCD_LINE2, "KP");
-// 	}
-	
-//     if(current.x > target.x)
-//     {
-//         turn_to_direction(current_state.direction, WEST);
-// 		TextOut(0, LCD_LINE3, "Nach Westen");
-//     }
-//     else if (current.x < target.x)
-//     {
-//         turn_to_direction(current_state.direction, EAST);
-// 		TextOut(0, LCD_LINE3, "Nach Osten");
-//     }
-//     else if (current.y > target.y)
-//     {
-//         turn_to_direction(current_state.direction, SOUTH);
-// 		TextOut(0, LCD_LINE3, "Nach Sueden");
-//     }
-//     else if(current.y < target.y)
-//     {
-//         turn_to_direction(current_state.direction, NORTH);
-// 		TextOut(0, LCD_LINE3, "Nach Norden");
-//     }
-//     else
-//     {
-//         //janz blöd throw Exception;
-//         //current and target are equal
-//         return;
-//     }
-
-// 	Wait(2000);
-	
-//     drive(TILE_SIZE, MOVE_FORWARD);
-//     current_state.pos_x = target.x;
-//     current_state.pos_y = target.y;
-
-// }
-
-// /*
-//  * turn to target direction. updated current_state
-//  */
-// void turn_to_direction(char current_direction, char target_direction)
-// {
-//     char offset = (target_direction - current_direction);
-	
-// 	// Gilt wenn offset == 3 und macht offset = -1 => wechselt die Drehrichtung (auch fuer -3 => 1)
-// 	if (abs(offset) > 2)
-// 		offset = -(offset % 2);
-
-//     if(offset < 0)
-//     {
-//         for(char i = 0; i < abs(offset); ++i)
-//         {
-//             turnLeft();
-//         }
-//     }
-//     else if (offset > 0)
-//     {
-//         for(char i = 0; i < abs(offset); ++i)
-//         {
-//             turnRight();
-//         } 
-//     }
-    
-//     current_state.direction = target_direction;
-// }
-
-// /*
-//  * Looks from current Position in current Direction and returns 
-//  * true if move is possible.
-//  */
-// bool see()
-// {
-//     // look at my stuff, my stuff is amazing
-
-//     bool is_move_with_current_state_possible = false;
-//     if (can_move(current_state.direction)) {
-//         is_move_with_current_state_possible = true;
-//     }
-//     return is_move_with_current_state_possible;
-// }
-
-// /*
-//  *  Updates the current Position (int current_state) 
-//  *  with the given direction.
-//  */
-// void update_current_position(char direction) {
-//     switch (direction) {
-//         case NORTH: current_state.pos_y += 1;
-//                     break;
-//         case EAST:  current_state.pos_x += 1;
-//                     break;
-//         case SOUTH: current_state.pos_y += -1;
-//                     break;
-//         case WEST:  current_state.pos_x += -1;
-//                     break;
-//         default: ;
-//     }
-// }
 
 /*
  *  Searches for new possible directions. If no new way is possible
@@ -328,6 +196,10 @@ bool can_move(short direction) {
     return result;
 }
 
+bool is_target_field() {
+    return get_ground_color() == INPUT_GREENCOLOR;
+}
+
 /*
  *  Explorer-Robot moves in current direction.
  *  If the field is OCCUPIED, it will be marked (as OCCUPIED) in the MOVE_SPACE 
@@ -337,7 +209,11 @@ bool can_move(short direction) {
  */
 void move() {
     drive(TILE_SIZE, MOVE_FORWARD);
-    if (is_occupied()) {
+    if (is_target_field()) {
+        update_current_position(current_state.direction);
+        MOVE_SPACE[current_state.pos_x][current_state.pos_y] = TARGET;
+        TextOut(0, LCD_LINE8, "Target found! :)");
+    } else if (is_occupied()) {
         update_current_position(current_state.direction);
         MOVE_SPACE[current_state.pos_x][current_state.pos_y] = OCCUPIED;
         drive(TILE_SIZE, MOVE_BACKWARD);
@@ -388,85 +264,31 @@ bool is_occupied() {
     return check_ground();
 }
 
+/**
+*   Return an int value representing the color of the ground. 
+*   Returns color black if read operation resulted in an error.
+*/
+int get_ground_color() {
+    SetSensorColorFull(GROUND_DETECTOR_RGB);
+    ColorSensorReadType csr;
+    csr.Port = GROUND_DETECTOR_RGB;
+    SysColorSensorRead(csr);
+    if (csr.Result == NO_ERR) {
+        return csr.ColorValue;
+    } else {
+        return INPUT_BLACKCOLOR;                    
+    }
+}
+
 /*
  *  Checks if the current ground color differs from the init value.
  */
 bool check_ground() {
-    SetSensorLight(GROUND_DETECTOR_R);
-    SetSensorLight(GROUND_DETECTOR_L);
-
-    return !((abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_R)) < LIGHT_THRESHOLD) 
-            && (abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_L)) < LIGHT_THRESHOLD));
+    if (get_ground_color() != INPUT_WHITECOLOR) {
+        return false;
+    } 
+    return true;
 }
-
-// /*
-//  *  Rotates the robot on his position.
-//  *  direction = 1: right
-//  *  direction = -1: left
-//  */
-// void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle)
-// {
-//     int wheelRotationAngle = angle * ((wheelDistance / 2) / wheelRadius);
-
-//     RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, (-direction) * 100, true, true);
-// }
-
-
-// void moveForward(char speed) {
-// //void RotateMotorEx(byte outputs,char pwr, long angle, char turnpct, bool sync, bool stop)   
-//     RotateMotorEx(BOTH_DRIVE, speed, 360, 100, true, true);
-//     //OnFwd(BOTH_DRIVE, speed);
-// }
-
-// void moveBackward(char speed) {
-//     moveForward(-1 * speed);
-// }
-
-// void backOff() {
-//     moveBackward(SPEED);
-// }
-
-// void stopMove() {
-//     OnFwd(BOTH_DRIVE, 0);
-// }
-
-// void rotate90(char direction)
-// {   
-//     rotateOnSpot(direction, WHEEL_DISTANCE, WHEEL_RADIUS, 90);
-//     // RotateMotorEx(BOTH_DRIVE, SPEED, 225, -direction * 100, true, true);
-// }
-
-// void turnRight() {
-//     rotateOnSpot(DIRECTION_RIGHT, WHEEL_DISTANCE, WHEEL_RADIUS, 90);
-// }
-
-// void turnLeft() {
-//     rotateOnSpot(DIRECTION_LEFT, WHEEL_DISTANCE, WHEEL_RADIUS, 90);
-// }
-
-// void turnAround() {
-//     turnRight();
-//     turnRight();
-// }
-
-// void drive(int distance, int direction)
-// {
-//     int wheelRotationAngle = 2 * PI * WHEEL_RADIUS * distance * direction;
-
-//     RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle, 0, true, true);
-// }
-
-
-// void drive_away()
-// {
-//     //Drive
-//     OnFwd(BOTH_DRIVE, 100);
-//     //Stop if touchsensor calls collision
-//     while(!Sensor(TOUCH_SENSOR));
-//     //Stop driving
-//     OnFwd(BOTH_DRIVE, 0);
-// }
-
 
 // +++ TASKS +++
 
@@ -482,8 +304,6 @@ task explore() {
 	
     while(EXPLORE) {
         // Test Output
-        ClearScreen();
-		NumOut(50, LCD_LINE1, stack.last_element);
 		Wait(500);
         		
         //Method Explorer
@@ -503,7 +323,26 @@ task explore() {
 	// Senden
 
     drive_away();
-	
-	StopAllTasks();
+}
+
+
+task stopOnTouch() 
+{
+    Follows (main);
+    SetSensorTouch(TOUCH_SENSOR);
+    
+    while (true)
+    {
+        while(!Sensor(TOUCH_SENSOR))
+        {
+            ;
+        }
+        
+        Acquire(drive_motors);
+
+        stopMove();
+        StopAllTasks();
+       
+    }
 }
 

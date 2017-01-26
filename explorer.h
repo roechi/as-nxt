@@ -13,7 +13,10 @@ bool can_move(short direction);
 void move();
 char find_new_direction();
 bool is_occupied();
+bool is_target_field();
 bool check_ground();
+int get_ground_color();
+
 
 // // Movement
 // void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle);
