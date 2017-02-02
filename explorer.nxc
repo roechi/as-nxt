@@ -353,6 +353,17 @@ void BTWait (){
     until(ReceiveRemoteBool(RECEIVING_MAILBOX, true, temp) == NO_ERR);
 }
 
+void send()
+{
+    TextOut(0, LCD_LINE1, StrCat("BT Status: ", NumToStr(BluetoothStatus(CONN_BT1))));
+    NumOut(0, LCD_LINE2, NO_ERR);
+    
+    BTWait();
+    TextOut(0, 0, "begin");
+
+    sendMap(MOVE_SPACE, X_DIM, Y_DIM);
+}
+
 // +++ TASKS +++
 
 task main() {
@@ -379,17 +390,7 @@ task explore() {
     drawMap(MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
 
 	// Senden
-
-    TextOut(0, LCD_LINE1, StrCat("BT Status: ", NumToStr(BluetoothStatus(CONN_BT1))));
-    NumOut(0, LCD_LINE2, NO_ERR);
-    
-    BTWait();
-    TextOut(0, 0, "begin");
-
-    char foo[X_DIM][Y_DIM];
-    initMap(foo, X_DIM, Y_DIM);
-
-    sendMap(foo, X_DIM, Y_DIM);
+    send();
 
     PlaySound(SOUND_DOWN);
     drive_away();
