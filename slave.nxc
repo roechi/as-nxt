@@ -182,8 +182,10 @@ void goToTarget() {
 	 // Bis hier gehts
 	 
      bool go = true;
+	 
+	 unsigned int a_star_iter = a_star_start_at;
      while(go) {
-          A_Star_Node node = a_star_reversed_path[a_star_start_at--];
+          A_Star_Node node = a_star_reversed_path[a_star_iter--];
           Position t; 
           t.x = node.pos.x;
           t.y = node.pos.y;
@@ -199,6 +201,9 @@ void goToTarget() {
 
           go = !checkForDone();
           round = round + 1;
+		  
+		  if (a_star_iter == 0)
+			break;
      }
 }
 
