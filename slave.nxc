@@ -15,8 +15,6 @@ void initMoveSpace()
 	char tmp_arr[];
 	ArrayInit(tmp_arr, 'E', MAP_DIM_X);
 	ArrayInit(MOVE_SPACE, tmp_arr, MAP_DIM_Y);
-	
-	MOVE_SPACE[2][2] = 'T';
 }
 
 void initTestMap() {
@@ -115,7 +113,7 @@ void receiveMap() {
     deserialize(data, MAP_DIM_X, MAP_DIM_Y, MOVE_SPACE);
     ClearScreen();
     drawMap(MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
-    Wait(10000);
+    Wait(2000);
 }
 
 void drawStats(Position t) {
@@ -214,7 +212,7 @@ task main ()
     bool read = true;
     int line = 0;
     SendResponseBool(MAILBOX1, true);
-    //receiveMap();
+    receiveMap();
     goToTarget();
 
     Wait(10000);
