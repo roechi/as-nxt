@@ -78,7 +78,7 @@ void a_star_calculate_path(A_Star_Position a_star_start, A_Star_Position a_star_
 		
 		if (a_star_compare_positions(current.pos, a_star_target))
 		{
-			a_star_build_path(current);
+			a_star_build_path(current);			
 			break;
 		}
 		else if (a_star_is_valid_position(current.pos))
@@ -392,7 +392,7 @@ void a_star_build_path(A_Star_Node a_star_target)
 	A_Star_Node current_node = a_star_target;
 	a_star_reversed_path[index++] = current_node;
 	
-	while (current_node.id != 0 && current_node.previous_node != 0)
+	while (current_node.previous_node != 0)
 	{
 		A_Star_Node tmp_node = a_star_closed_list[a_star_get_closed_list_index_by_id(current_node.previous_node)];
 		

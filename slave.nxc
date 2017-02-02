@@ -12,9 +12,20 @@ int round = 0;
 
 void initMoveSpace()
 {
-	char tmp_arr[];
-	ArrayInit(tmp_arr, 'E', MAP_DIM_X);
-	ArrayInit(MOVE_SPACE, tmp_arr, MAP_DIM_Y);
+	//char tmp_arr[];
+	//ArrayInit(tmp_arr, 'E', MAP_DIM_X);
+	//ArrayInit(MOVE_SPACE, tmp_arr, MAP_DIM_Y);
+	
+	for (int i = 0; i < MAP_DIM_X; i++)
+	{
+		for (int j = 0; j < MAP_DIM_Y; j++)
+		{
+			MOVE_SPACE[i][j] = 'E';
+		}
+	}
+	
+	
+	//MOVE_SPACE[2][2] = 'T';
 }
 
 void initTestMap() {
@@ -46,20 +57,27 @@ void initTestMap() {
     // };
 
 
-       char m[MAP_DIMATION][MAP_DIMATION] = {
-    {'E','C','C','C','C','C','C','C','C','T'},
-    {'E','C','C','C','C','E','E','E','C','E'},
-    {'E','C','C','C','C','E','C','E','C','E'},
-    {'E','C','C','C','C','E','C','E','E','E'},
-    {'E','E','E','E','C','E','C','C','C','E'},
-    {'E','C','C','E','C','E','C','C','C','E'},
-    {'E','C','C','E','C','E','C','C','C','E'},
-    {'E','C','C','E','E','E','C','C','C','E'},
-    {'E','C','C','C','C','C','C','C','C','E'},
-    {'E','C','C','C','C','C','C','C','C','E'}
+//       char m[MAP_DIMATION][MAP_DIMATION] = {
+//    {'E','C','C','C','C','C','C','C','C','T'},
+//    {'E','C','C','C','C','E','E','E','C','E'},
+//    {'E','C','C','C','C','E','C','E','C','E'},
+//    {'E','C','C','C','C','E','C','E','E','E'},
+//    {'E','E','E','E','C','E','C','C','C','E'},
+//    {'E','C','C','E','C','E','C','C','C','E'},
+//    {'E','C','C','E','C','E','C','C','C','E'},
+//    {'E','C','C','E','E','E','C','C','C','E'},
+//    {'E','C','C','C','C','C','C','C','C','E'},
+//    {'E','C','C','C','C','C','C','C','C','E'}
+//    };
+/*
+char m[MAP_DIM_X][MAP_DIM_Y] = {
+    {'E','C','T'},
+    {'E','E','E'},
+    {'E','C','C'},
     };
 
-//MOVE_SPACE = m;
+MOVE_SPACE = m;
+*/
 }
 
 void receiveMap() {
@@ -138,7 +156,7 @@ void draw(Position t) {
 }
 
 void init() {
-	initMoveSpace();
+	//initMoveSpace();
 
     current_state.pos_x = 0;
     current_state.pos_y = 0;
@@ -163,46 +181,50 @@ A_Star_Position find_target_position() {
 
 bool checkForDone() {
     bool done = false;
-    if (map.data[current_state.pos_x][current_state.pos_y] == TARGET &&
-        a_star_start_at == 0) {
+    if (MOVE_SPACE[current_state.pos_x][current_state.pos_y] == TARGET) {
         done = true;
     }
     return done;
 }
 
 void goToTarget() {
-     A_Star_Position startPos;
-     startPos.x = 0;
-     startPos.y = 0;
-     A_Star_Position target = find_target_position();
-     a_star_calculate_path(startPos, target, MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
+	A_Star_Position startPos;
+	startPos.x = 0;
+	startPos.y = 0;
+	
+	A_Star_Position target = find_target_position();
+	
+	
+	a_star_calculate_path(startPos, target, MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
 
-	 // Bis hier gehts
-	 
-     bool go = true;
-	 
-	 unsigned int a_star_iter = a_star_start_at;
-     while(go) {
-          A_Star_Node node = a_star_reversed_path[a_star_iter--];
-          Position t; 
-          t.x = node.pos.x;
-          t.y = node.pos.y;
+	bool go = true;
 
-          Position p; 
-          p.x = current_state.pos_x;
-          p.y = current_state.pos_y;
-          
-          draw(t);
-          move_to_target(p,t);
+	int a_star_iter = a_star_start_at;
+	while(go && a_star_iter > -1) {
+	
+		ClearScreen();
+		NumOut(0, LCD_LINE1, a_star_iter);
+		Wait(2000);
+		ClearScreen();
+	
+		A_Star_Node node = a_star_reversed_path[a_star_iter--];
+		Position t; 
+		t.x = node.pos.x;
+		t.y = node.pos.y;
+		
+		Position p; 
+		p.x = current_state.pos_x;
+		p.y = current_state.pos_y;
 
-          MOVE_SPACE[t.x][t.y] = '0';
+		draw(t);
+		
+		move_to_target(p,t);
 
-          go = !checkForDone();
-          round = round + 1;
-		  
-		  if (a_star_iter == 0)
-			break;
-     }
+		MOVE_SPACE[t.x][t.y] = '0';
+
+		go = !checkForDone();
+		round = round + 1;
+	}
 }
 
 task main ()
