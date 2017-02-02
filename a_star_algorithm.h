@@ -77,10 +77,7 @@ void a_star_calculate_path(A_Star_Position a_star_start, A_Star_Position a_star_
 		A_Star_Node current = a_star_get_node_with_minimum_distance();
 		
 		if (a_star_compare_positions(current.pos, a_star_target))
-		{
-			TextOut(0, 0, "Fertig       ");
-			Wait(2000);
-		
+		{		
 			a_star_build_path(current);
 			break;
 		}
@@ -144,7 +141,6 @@ bool a_star_add_to_open_list(A_Star_Node node)
 			a_star_open_list[i].distance = node.distance;
 			a_star_open_list[i].previous_node = node.previous_node;
 			a_star_open_list[i].id = node.id;
-			
 			
 			is_set = true;
 		}
@@ -408,4 +404,3 @@ void a_star_build_path(A_Star_Node a_star_target)
 		a_star_reversed_path[i].id = 0;
 	}
 }
-
