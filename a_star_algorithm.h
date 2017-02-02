@@ -73,16 +73,17 @@ void a_star_calculate_path(A_Star_Position a_star_start, A_Star_Position a_star_
 	a_star_add_to_open_list(start_node);
 	
 	while (a_star_count_open_list_elements() > 0)
-	{		
+	{	
 		A_Star_Node current = a_star_get_node_with_minimum_distance();
 		
 		if (a_star_compare_positions(current.pos, a_star_target))
-		{		
+		{
 			a_star_build_path(current);
 			break;
 		}
 		else if (a_star_is_valid_position(current.pos))
 		{
+		
 			a_star_add_to_closed_list(current);
 			a_star_delete_from_open_list(current);
 			
@@ -90,7 +91,7 @@ void a_star_calculate_path(A_Star_Position a_star_start, A_Star_Position a_star_
 		}
 		else
 		{
-			TextOut(0, 0, "Error");
+			TextOut(0, LCD_LINE7, "Error");
 			Wait(1000);
 		}
 	}
@@ -157,7 +158,13 @@ bool a_star_add_to_closed_list(A_Star_Node node)
 	{
 		if (a_star_closed_list[i].is_active == false || !a_star_is_valid_position(a_star_closed_list[i].pos))
 		{
-			a_star_closed_list[i] = node;
+			a_star_closed_list[i].is_active = true;
+			a_star_closed_list[i].pos.x = node.pos.x;
+			a_star_closed_list[i].pos.y = node.pos.y;
+			a_star_closed_list[i].distance = node.distance;
+			a_star_closed_list[i].previous_node = node.previous_node;
+			a_star_closed_list[i].id = node.id;			
+			
 			is_set = true;
 		}
 	}
@@ -176,6 +183,7 @@ bool a_star_delete_from_open_list(A_Star_Node node)
 		a_star_open_list[index].pos.y = -1;
 		a_star_open_list[index].distance = 0;
 		a_star_open_list[index].previous_node = 0;
+		a_star_open_list[index].id = -1;
 	
 		return true;
 	}
@@ -196,6 +204,7 @@ bool a_star_delete_from_closed_list(A_Star_Node node)
 		a_star_closed_list[index].pos.y = -1;
 		a_star_closed_list[index].distance = 0;
 		a_star_closed_list[index].previous_node = 0;
+		a_star_closed_list[index].id = -1;
 	
 		return true;
 	}
@@ -239,6 +248,7 @@ void a_star_clear_lists()
 	default_node.pos.y = -1;
 	default_node.distance = 0;
 	default_node.previous_node = 0;
+	default_node.id = -1;
 	
 	for (unsigned char i = 0; i < LIST_SIZE; ++i)
 	{
@@ -382,10 +392,10 @@ void a_star_build_path(A_Star_Node a_star_target)
 	A_Star_Node current_node = a_star_target;
 	a_star_reversed_path[index++] = current_node;
 	
-	while (current_node.previous_node != 0)
+	while (current_node.id != 0 && current_node.previous_node != 0)
 	{
+		A_Star_Node tmp_node = a_star_closed_list[a_star_get_closed_list_index_by_id(current_node.previous_node)];
 		
-		A_Star_Node tmp_node = a_star_get_closed_list_index_by_id(current_node.previous_node);
 		current_node.previous_node = tmp_node.previous_node;
 		current_node.id = tmp_node.id;
 		current_node.pos.x = tmp_node.pos.x;
@@ -398,9 +408,4 @@ void a_star_build_path(A_Star_Node a_star_target)
 	}
 	
 	a_star_start_at = index - 1;
-	
-	for (unsigned char i = index; i < LIST_SIZE; ++i)
-	{
-		a_star_reversed_path[i].id = 0;
-	}
 }
