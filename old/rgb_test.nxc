@@ -1,0 +1,12 @@
+task main()
+{
+    while(true) {
+        SetSensorColorFull(S3);
+        ColorSensorReadType csr;
+        csr.Port = S3;
+        SysColorSensorRead(csr);
+        if (csr.Result == NO_ERR) {
+            NumOut(0, LCD_LINE1, csr.ColorValue);
+        }
+    }
+}

@@ -1,0 +1,47 @@
+#include "defines.h"
+#include "stack.h"
+// #include "current_state.h"
+// #include "a_star_algorithm.h"
+#include "explorer.h"
+#include "movement.h"
+#include "map_drawing.h"
+
+const int LEFT_DEGREES = 90;
+const int RIGHT_DEGREES = 90;
+
+void right(int degrees)
+{
+    rotateOnSpot(DIRECTION_RIGHT, WHEEL_DISTANCE, WHEEL_RADIUS, degrees);
+}
+
+void left(int degrees)
+{
+    rotateOnSpot(DIRECTION_LEFT, WHEEL_DISTANCE, WHEEL_RADIUS, degrees);
+}
+
+task main()
+{
+    for (int i = 0; i < 4; i++)
+    {
+        right(RIGHT_DEGREES);
+        Wait(500);
+        left(LEFT_DEGREES);
+        Wait(500);
+    } 
+
+    for (int i = 0; i < 4; i++)
+    {
+        drive(TILE_SIZE, MOVE_FORWARD);
+        Wait(500);
+        right(RIGHT_DEGREES);
+        Wait(500);
+    } 
+
+    for (int i = 0; i < 4; i++)
+    {
+        drive(TILE_SIZE, MOVE_FORWARD);
+        Wait(500);        
+        left(LEFT_DEGREES);
+        Wait(500);
+    } 
+}
