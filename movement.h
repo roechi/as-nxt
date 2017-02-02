@@ -126,11 +126,11 @@ void turn_to_direction(char current_direction, char target_direction)
  */
 void move_to_target(Position current, Position target)
 {
-	Wait(1000);
+	//Wait(1000);
 	
-    Position p = get_top();	
+    //Position p = get_top();	
 	
-	char d = current_state.direction;
+	//char d = current_state.direction;
 	
 	// switch (d)
 	// {
