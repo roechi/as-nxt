@@ -49,8 +49,8 @@ Position stack_pop()
 	else
 	{
 		Position tmp;
-		tmp.x = -1;
-		tmp.y = -1;
+		tmp.x = 0;
+		tmp.y = 0;
 		
 		return tmp;
 	}	
@@ -63,9 +63,15 @@ unsigned char stack_length()
 
 Position get_top()
 {
-	if (stack.last_element == 0) {
-		return stack.space[0];
+	if (stack.last_element <= 0)
+	{
+		Position tmp;
+		tmp.x = -1;
+		tmp.y = -1;
+		
+		return tmp;
 	}
+	
 	return stack.space[stack.last_element - 1];
 }
 

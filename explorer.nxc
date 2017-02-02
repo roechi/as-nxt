@@ -102,7 +102,7 @@ void doStuff() {
     }
     else                                    //go back
     {
-		// ClearScreen();
+		ClearScreen();
 		// TextOut(0, LCD_LINE1, "Vor Pop");
 		// Wait(2000);
 	
@@ -113,6 +113,15 @@ void doStuff() {
 		
 		
         Position target = get_top();
+		TextOut(8, LCD_LINE1, "Ich bin: ");
+		NumOut(0, LCD_LINE2, current.x);
+		NumOut(10, LCD_LINE2, current.y);
+		
+		TextOut(8, LCD_LINE4, "Fahre nach: ");
+		NumOut(0, LCD_LINE5, target.x);
+		NumOut(10, LCD_LINE5, target.y);
+		Wait(1000);
+		
         // TextOut(0, LCD_LINE2, "Get Last Element Ok");
 		
         //move to target

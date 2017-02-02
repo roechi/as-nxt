@@ -1,0 +1,83 @@
+const unsigned char LIST_SIZE = 255;
+
+// Field-specifier
+const char FREE = 'F';
+const char OCCUPIED = 'C';
+const char TARGET = 'T';
+const char EXPLORED = 'E';
+const char BORDER = 'B';
+
+
+#include "a_star_algorithm.h"
+
+
+#define MAP_DIMATION 10
+char MOVE_SPACE[MAP_DIMATION][MAP_DIMATION] =
+{
+    {'E','C','C','E','E','C','C','E','C','T'},
+    {'E','C','C','E','C','E','E','E','C','E'},
+    {'E','E','E','E','C','E','C','E','C','E'},
+    {'E','C','C','C','C','E','C','E','E','E'},
+    {'E','E','E','E','C','E','E','C','C','E'},
+    {'E','C','C','E','C','E','C','C','C','E'},
+    {'E','C','C','E','C','E','C','C','C','E'},
+    {'E','C','C','E','E','E','C','C','C','E'},
+    {'E','C','C','C','C','C','C','C','C','E'},
+    {'E','C','C','C','C','C','C','C','C','E'}
+};
+
+
+
+
+//#define MAP_DIMATION 5
+//char MOVE_SPACE[MAP_DIMATION][MAP_DIMATION] = 
+//	{
+//		{'E','C','E','E','C'},
+//		{'E','C','E','C','C'},
+//		{'E','C','E','E','E'},
+//		{'E','E','E','C','E'},
+//		{'E','C','C','C','E'},
+//		{'E','E','E','C','E'}
+//    };
+
+
+
+task main ()
+{
+	TextOut(0, LCD_LINE1, "Ich leg mal los");
+
+	A_Star_Position start_pos;
+	start_pos.x = 0;
+	start_pos.y = 0;
+	
+	A_Star_Position target_pos;
+	target_pos.x = 0;
+	target_pos.y = 9;
+	
+	a_star_calculate_path(start_pos, target_pos, MOVE_SPACE, MAP_DIMATION, MAP_DIMATION);
+	
+	
+	
+	unsigned int j = 0;
+	for (unsigned int i = a_star_start_at; ; --i)
+	{
+		A_Star_Node node = a_star_reversed_path[i];
+		
+		NumOut(j * 8, LCD_LINE2, node.pos.x);
+		NumOut(j * 8, LCD_LINE3, node.pos.y);
+		
+		Wait(500);
+		  
+		j++;
+		
+		if (i == 0)
+			break;
+	}
+	
+	
+	
+	
+	TextOut(0, LCD_LINE5, "Fertig");
+	
+    Wait(20000);
+}

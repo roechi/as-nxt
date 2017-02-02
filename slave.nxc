@@ -197,7 +197,7 @@ void goToTarget() {
 
           MOVE_SPACE[t.x][t.y] = '0';
 
-          go = checkForDone();
+          go = !checkForDone();
           round = round + 1;
      }
 }
