@@ -10,9 +10,6 @@
 
 const int CHUNK_SIZE = 25;
 const int RECEIVING_MAILBOX = MAILBOX1;
-
-const int X_DIM = 8;
-const int Y_DIM = 8;
     
 void initMap(char & in[][], int x_dim, int y_dim);
 void sendMap(char & map[][], int x_dim, int y_dim);
@@ -431,7 +428,7 @@ void send()
     BTWait();
     TextOut(0, 0, "begin");
 
-    sendMap(MOVE_SPACE, X_DIM, Y_DIM);
+    sendMap(MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
 }
 
 // +++ TASKS +++

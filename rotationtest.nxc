@@ -21,6 +21,22 @@ void left(int degrees)
 
 task main()
 {
+    for (int i = 0; i < 16; i++)
+    {
+        right(RIGHT_DEGREES);
+        Wait(500);
+    } 
+
+    Wait(10000);
+
+    for (int i = 0; i < 16; i++)
+    {
+        left(LEFT_DEGREES);
+        Wait(500);
+    } 
+
+    Wait(10000);
+
     for (int i = 0; i < 4; i++)
     {
         right(RIGHT_DEGREES);
@@ -29,19 +45,4 @@ task main()
         Wait(500);
     } 
 
-    for (int i = 0; i < 4; i++)
-    {
-        drive(TILE_SIZE, MOVE_FORWARD);
-        Wait(500);
-        right(RIGHT_DEGREES);
-        Wait(500);
-    } 
-
-    for (int i = 0; i < 4; i++)
-    {
-        drive(TILE_SIZE, MOVE_FORWARD);
-        Wait(500);        
-        left(LEFT_DEGREES);
-        Wait(500);
-    } 
 }
