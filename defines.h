@@ -17,15 +17,15 @@
 #define MAX_US_DISTANCE 25
 #define LIGHT_THRESHOLD 15
 #define WHEEL_RADIUS 1.5 //2.8
-#define WHEEL_DISTANCE 10.6 //13.8
+#define WHEEL_DISTANCE 11 //13.8
 #define TILE_SIZE 30
 #define MOVE_FORWARD 1
 #define MOVE_BACKWARD -1
 
 // +++ NAVIGATION +++
 // Dimensions
-const char MAP_DIM_X = 4;
-const char MAP_DIM_Y = 4;
+const char MAP_DIM_X = 7;
+const char MAP_DIM_Y = 7;
 // Directions
 const char NORTH = 0;
 const char EAST = 1;
