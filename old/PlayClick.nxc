@@ -1,9 +1,10 @@
 // Test program. Should be on the slave.
 
 task main () {
-  while(true) {
-    PlayFile("! Click.rso");
-    Wait(1000);
-  }
+
+     while(true) {
+          PlayFileEx("!chaos_004.rmd", 255, true);
+                 Wait(1000);
+     }
 }
 
