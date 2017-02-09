@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "a_star_algorithm.h"
 #include "stack.h"
 // #include "current_state.h"
 // #include "a_star_algorithm.h"
@@ -75,9 +76,10 @@ void init_current_state(char x, char y, char direction) {
 
 void init_ground_detectors() {
     SetSensorColorFull(GROUND_DETECTOR_RGB);
-    SetSensorColorFull(GROUND_DETECTOR_LIGHT);
+    //SetSensorColorFull(GROUND_DETECTOR_LIGHT); ???
     
-    NORMAL_GROUND_COLOR = Sensor(GROUND_DETECTOR_RGB);
+	SetSensorLight(GROUND_DETECTOR_LIGHT);
+    NORMAL_GROUND_COLOR = Sensor(GROUND_DETECTOR_LIGHT);
 }
 
 // +++ Explorer logic +++
@@ -88,9 +90,15 @@ void doStuff() {
 	{
 		EXPLORE = false;
         TextOut(0, LCD_LINE3, "All explored");
-        Wait(1000);
+        Wait(500);
 		return;
-	}		
+	}
+	
+	//ClearScreen();
+	//TextOut(0, LCD_LINE1, "Ich bin: ");
+	//NumOut(0, LCD_LINE2, current_state.pos_x);
+	//NumOut(10, LCD_LINE2, current_state.pos_y);
+	
 
     if(can_move(current_state.direction))   //move in current direction
     {
@@ -102,7 +110,6 @@ void doStuff() {
     }
     else                                    //go back
     {
-		ClearScreen();
 		// TextOut(0, LCD_LINE1, "Vor Pop");
 		// Wait(2000);
 	
@@ -111,24 +118,69 @@ void doStuff() {
         Position current = stack_pop();
 		// TextOut(0, LCD_LINE1, "Pop Ok:");
 		
-		
         Position target = get_top();
-		TextOut(8, LCD_LINE1, "Ich bin: ");
-		NumOut(0, LCD_LINE2, current.x);
-		NumOut(10, LCD_LINE2, current.y);
 		
-		TextOut(8, LCD_LINE4, "Fahre nach: ");
-		NumOut(0, LCD_LINE5, target.x);
-		NumOut(10, LCD_LINE5, target.y);
-		Wait(1000);
+		//TextOut(0, LCD_LINE4, "Zurueck nach: ");
+		//NumOut(0, LCD_LINE5, target.x);
+		//NumOut(10, LCD_LINE5, target.y);
+		//Wait(1000);
 		
-        // TextOut(0, LCD_LINE2, "Get Last Element Ok");
+		//TextOut(0, LCD_LINE6, "Stack: ");
+		//NumOut(0, LCD_LINE7, current.x);
+		//NumOut(10, LCD_LINE7, current.y);
+		
+		
+		if (current.x == -1)
+			return;
 		
         //move to target
         move_to_target(current, target);
 		// TextOut(0, LCD_LINE3, "After Move To");
 		// Wait(1000);
     }
+}
+
+void go_to_start()
+{
+	if (current_state.pos_x == -1 || current_state.pos_y == -1)
+		return;
+
+	A_Star_Position current_pos;	// Start is 0/0
+	current_pos.x = current_state.pos_x;
+	current_pos.y = current_state.pos_y;
+
+	A_Star_Position target_pos;	// Start is 0/0
+	target_pos.x = 0;
+	target_pos.y = 0;
+	
+	a_star_calculate_path(current_pos, target_pos, MOVE_SPACE, MAP_DIM_X, MAP_DIM_Y);
+	
+	int a_star_iter = a_star_start_at;
+	while(a_star_iter > -1)
+	{
+		A_Star_Node node = a_star_reversed_path[a_star_iter--];
+		Position t; 
+		t.x = node.pos.x;
+		t.y = node.pos.y;
+		
+		Position p; 
+		p.x = current_state.pos_x;
+		p.y = current_state.pos_y;
+		
+		move_to_target(p, t);
+	}
+	
+	// Position is 0/0
+	
+	Position start_pos; 
+	start_pos.x = current_state.pos_x;	// or 0
+	start_pos.y = current_state.pos_y;	// or 0
+	
+	Position outer_pos;	// target is -1/0
+	outer_pos.x = -1;
+	outer_pos.y = 0;
+		
+	move_to_target(start_pos, outer_pos);
 }
 
 /*
@@ -237,6 +289,19 @@ void move() {
         update_current_position(current_state.direction);
         MOVE_SPACE[current_state.pos_x][current_state.pos_y] = TARGET;
         TextOut(0, LCD_LINE8, "Target found! :)");
+		Wait(500);
+				
+		Position tmp;
+		tmp.x = current_state.pos_x;
+		tmp.y = current_state.pos_y;
+		stack_push(tmp);
+		
+		//ClearScreen();
+		//TextOut(8, LCD_LINE1, "Pushe: ");
+		//NumOut(0, LCD_LINE2, tmp.x);
+		//NumOut(10, LCD_LINE2, tmp.y);
+		//Wait(1000);
+		
     } else if (is_occupied()) {
         update_current_position(current_state.direction);
         MOVE_SPACE[current_state.pos_x][current_state.pos_y] = OCCUPIED;
@@ -249,6 +314,12 @@ void move() {
 		Position tmp;
 		tmp.x = current_state.pos_x;
 		tmp.y = current_state.pos_y;
+		
+		//ClearScreen();
+		//TextOut(8, LCD_LINE1, "Pushe: ");
+		//NumOut(0, LCD_LINE2, tmp.x);
+		//NumOut(10, LCD_LINE2, tmp.y);
+		//Wait(1000);
 		
 		stack_push(tmp);
 	}
@@ -308,10 +379,9 @@ int get_ground_color() {
  *  Checks if the current ground color differs from the init value.
  */
 bool check_ground() {
-    if (get_ground_color() != INPUT_WHITECOLOR) {
-        return false;
-    } 
-    return true;
+	SetSensorLight(GROUND_DETECTOR_LIGHT);
+
+    return !(abs(NORMAL_GROUND_COLOR - Sensor(GROUND_DETECTOR_LIGHT)) < LIGHT_THRESHOLD);
 }
 
 
@@ -377,10 +447,12 @@ task explore() {
     init_MoveSpace();
     init_current_state(0, 0, NORTH);
 	
-    while(EXPLORE) {        		
+    while(EXPLORE) {
         //Method Explorer
 		doStuff();
     }
+	
+	go_to_start();
 
 	ClearScreen();
 	TextOut(0, LCD_LINE1, "Fertig");
@@ -393,7 +465,7 @@ task explore() {
     send();
 
     PlaySound(SOUND_DOWN);
-    drive_away();
+    //drive_away();
 }
 
 

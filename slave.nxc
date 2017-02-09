@@ -9,6 +9,7 @@
 Map map;
 int round = 0;
 
+mutex drive_motors;
 
 void initMoveSpace()
 {
@@ -157,11 +158,13 @@ void draw(Position t) {
 
 void init() {
 	//initMoveSpace();
+	
+	Acquire(drive_motors);
 
     current_state.pos_x = 0;
     current_state.pos_y = 0;
     current_state.direction = NORTH;
-    initTestMap();
+    //initTestMap();
 }
 
 A_Star_Position find_target_position() {
@@ -235,6 +238,9 @@ task main ()
     int line = 0;
     SendResponseBool(MAILBOX1, true);
     receiveMap();
+	
+	drive(TILE_SIZE, MOVE_FORWARD);
+	
     goToTarget();
 
     Wait(10000);
