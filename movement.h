@@ -4,8 +4,11 @@ Current_State current_state;
 
 // Movement
 void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int angle);
+//should not be used anymore!!!
 void moveForward(char speed);
+//should not be used anymore!!!
 void moveBackward(char speed);
+//should not be used anymore!!!
 void backOff();
 void stopMove();
 void rotate90(char direction);
@@ -32,17 +35,17 @@ void rotateOnSpot(char direction, float wheelDistance, float wheelRadius, int an
     RotateMotorEx(BOTH_DRIVE, ROTATION_SPEED, wheelRotationAngle, (-direction) * 100, true, true);
 }
 
-
+//should not be used anymore!!!
 void moveForward(char speed) {
 //void RotateMotorEx(byte outputs,char pwr, long angle, char turnpct, bool sync, bool stop)   
     RotateMotorEx(BOTH_DRIVE, speed, 360, 100, true, true);
     //OnFwd(BOTH_DRIVE, speed);
 }
-
+//should not be used anymore!!!
 void moveBackward(char speed) {
     moveForward(-1 * speed);
 }
-
+//should not be used anymore!!!
 void backOff() {
     moveBackward(SPEED);
 }
