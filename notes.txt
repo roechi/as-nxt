@@ -1,0 +1,15 @@
+so hier jetzt diese dumme Abhandlung zu unseren übertrieben geilen Robotern!
+
+
+Unabhängiges nötiges Wissen/Voraussetzung über die Umgebung
+allgemein:
+- Position 0/0 (Startposition)
+- Größe eines Feldes (Kachel)
+- (Eigene Größe) (nur noch für die Drehung, ansonsten hat er ja die Kachelgröße)
+
+was braucht der Explorer:
+- Größe der Welt
+
+
+was braucht der blindBot:
+
