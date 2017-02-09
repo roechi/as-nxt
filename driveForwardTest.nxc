@@ -1,0 +1,46 @@
+#include "defines.h"
+#include "stack.h"
+// #include "current_state.h"
+// #include "a_star_algorithm.h"
+#include "explorer.h"
+// #include "movement.h"
+#include "map_drawing.h"
+
+const int LEFT_DEGREES = 90;
+const int RIGHT_DEGREES = 90;
+
+void drive(int distance, int direction)
+{
+    int wheelRotationAngle = distance * 360 / (2 * WHEEL_RADIUS * PI);
+
+    RotateMotorEx(BOTH_DRIVE, SPEED, wheelRotationAngle * direction, 0, true, true);
+}
+
+task main()
+{
+    for (int i = 0; i < 16; i++)
+    {
+        drive(TILE_SIZE, NORTH);
+        //right(RIGHT_DEGREES);
+        Wait(500);
+    } 
+
+    // Wait(10000);
+
+    // for (int i = 0; i < 16; i++)
+    // {
+    //     left(LEFT_DEGREES);
+    //     Wait(500);
+    // } 
+
+    // Wait(10000);
+
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     right(RIGHT_DEGREES);
+    //     Wait(500);
+    //     left(LEFT_DEGREES);
+    //     Wait(500);
+    // } 
+
+}
