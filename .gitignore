@@ -1,4 +1,5 @@
 **/*.bak
+**/*.exe
 **/*.sym
 **/*.rxe
 .vscode/
